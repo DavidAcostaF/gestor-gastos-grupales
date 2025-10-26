@@ -30,10 +30,17 @@ class UserRepository extends BaseRepository {
   }
 
   async delete(id) {
-    // soft delete
     const _id = typeof id === "string" ? new ObjectId(id) : id;
     const res = await this.getCollection().updateOne({ _id }, { $set: { deletedAt: new Date() } });
     return res.modifiedCount > 0;
+  }
+
+  async findByEmail(email) {
+    return await this.getCollection().findOne({ email, deletedAt: null });
+  }
+  
+  async findByCredentials(username, password) {
+    return await this.getCollection().findOne({ username, password, deletedAt: null });
   }
 }
 

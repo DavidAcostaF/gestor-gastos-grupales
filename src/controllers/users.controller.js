@@ -1,56 +1,86 @@
-const users = require('../data/users.data');
 
-exports.getUsers = (req, res) => {
-  res.json({
-    success: true,
-    data: users,
-  });
-};
+module.exports = function buildUsersController({ userRepo }) {
+  if (!userRepo) throw new Error('userRepo es requerido en users.controller');
 
-exports.getUserById = (req, res, next) => {
-  const user = users.find(u => u.id === req.params.id);
-  if (!user) {
-    const error = new Error('Usuario no encontrado');
-    error.status = 404;
-    return next(error);
-  }
-  res.json({ success: true, data: user });
-};
+  return {
+    createUser: async (req, res, next) => {
+      try {
+        const now = new Date();
+        const newUser = {
+          name: req.body.name,
+          email: req.body.email,
+          status: 'active',
+          createdAt: now,
+          updatedAt: now,
+          deletedAt: null,
+        };
 
-exports.createUser = (req, res, next) => {
-  try {
-    const newUser = {
-      id: `u-${Date.now()}`,
-      name: req.body.name,
-      email: req.body.email,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-    };
-    users.push(newUser);
-    res.status(201).json({ success: true, data: newUser });
-  } catch (error) {
-    next(error);
-  }
-};
+        const insertedId = await userRepo.create(newUser);
+        const created = await userRepo.getById(insertedId);
+        return res.status(201).json({ success: true, data: created });
+      } catch (error) {
+        next(error);
+      }
+    },
 
-exports.updateUser = (req, res, next) => {
-  const index = users.findIndex(u => u.id === req.params.id);
-  if (index === -1) {
-    const error = new Error('Usuario no encontrado');
-    error.status = 404;
-    return next(error);
-  }
-  users[index] = { ...users[index], ...req.body, updatedAt: new Date().toISOString() };
-  res.json({ success: true, data: users[index] });
-};
+    getUsers: async (req, res, next) => {
+      try {
+        const filter = {};
+        if (req.query.status) filter.status = req.query.status;
+        const users = await userRepo.getAll(filter);
+        return res.json({ success: true, data: users });
+      } catch (error) {
+        next(error);
+      }
+    },
 
-exports.deleteUser = (req, res, next) => {
-  const index = users.findIndex(u => u.id === req.params.id);
-  if (index === -1) {
-    const error = new Error('Usuario no encontrado');
-    error.status = 404;
-    return next(error);
-  }
-  users.splice(index, 1);
-  res.status(204).send();
+    getUserById: async (req, res, next) => {
+      try {
+        const user = await userRepo.getById(req.params.id);
+        if (!user) {
+          const err = new Error('Usuario no encontrado');
+          err.status = 404;
+          throw err;
+        }
+        return res.json({ success: true, data: user });
+      } catch (error) {
+        next(error);
+      }
+    },
+
+    updateUser: async (req, res, next) => {
+      try {
+        const { id } = req.params;
+        const updateFields = { ...req.body, updatedAt: new Date() };
+        delete updateFields._id;
+        delete updateFields.createdAt;
+        delete updateFields.deletedAt;
+
+        const ok = await userRepo.update(id, updateFields);
+        if (!ok) {
+          const err = new Error('Usuario no encontrado o no actualizado');
+          err.status = 404;
+          throw err;
+        }
+        const updated = await userRepo.getById(id);
+        return res.json({ success: true, data: updated });
+      } catch (error) {
+        next(error);
+      }
+    },
+
+    deleteUser: async (req, res, next) => {
+      try {
+        const ok = await userRepo.delete(req.params.id);
+        if (!ok) {
+          const err = new Error('Usuario no encontrado o no eliminado');
+          err.status = 404;
+          throw err;
+        }
+        return res.status(204).send();
+      } catch (error) {
+        next(error);
+      }
+    },
+  };
 };

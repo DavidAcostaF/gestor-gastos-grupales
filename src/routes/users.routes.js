@@ -1,11 +1,17 @@
 const { Router } = require('express');
-const router = Router();
-const userController = require('../controllers/users.controller');
+const buildUsersController = require('../controllers/users.controller');
 
-router.post('/', userController.createUser);
-router.get('/', userController.getUsers);
-router.get('/:id', userController.getUserById);
-router.patch('/:id', userController.updateUser);
-router.delete('/:id', userController.deleteUser);
+module.exports = function buildUsersRouter({ userRepo }) {
+  if (!userRepo) throw new Error('userRepo es requerido en users.routes');
 
-module.exports = router;
+  const router = Router();
+  const controller = buildUsersController({ userRepo });
+
+  router.post('/', controller.createUser);
+  router.get('/', controller.getUsers);
+  router.get('/:id', controller.getUserById);
+  router.patch('/:id', controller.updateUser);
+  router.delete('/:id', controller.deleteUser);
+
+  return router;
+};
