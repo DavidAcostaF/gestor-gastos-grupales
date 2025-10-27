@@ -1,4 +1,3 @@
-
 module.exports = function buildUsersController({ userRepo }) {
   if (!userRepo) throw new Error('userRepo es requerido en users.controller');
 

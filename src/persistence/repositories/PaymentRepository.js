@@ -27,7 +27,19 @@ class PaymentRepository extends BaseRepository {
   }
 
   async getAll(filter = {}) {
-    return this.getCollection().find(filter).toArray();
+    const queryFilter = { ...filter };
+
+    if (queryFilter.groupId && typeof queryFilter.groupId === 'string') {
+      queryFilter.groupId = new ObjectId(queryFilter.groupId);
+    }
+    if (queryFilter.userId && typeof queryFilter.userId === 'string') {
+      queryFilter.userId = new ObjectId(queryFilter.userId);
+    }
+    if (queryFilter.approvedBy && typeof queryFilter.approvedBy === 'string') {
+      queryFilter.approvedBy = new ObjectId(queryFilter.approvedBy);
+    }
+
+    return this.getCollection().find(queryFilter).toArray();
   }
 
   async update(id, updateFields) {
