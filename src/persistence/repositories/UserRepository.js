@@ -1,10 +1,9 @@
 const { ObjectId } = require("mongodb");
-const BaseRepository  = require("./BaseRepository");
+const BaseRepository = require("./BaseRepository");
 
 class UserRepository extends BaseRepository {
   constructor(db) {
     super("users", db);
-
   }
 
   async create(userObj) {
@@ -25,22 +24,32 @@ class UserRepository extends BaseRepository {
   async update(id, updateFields) {
     const _id = typeof id === "string" ? new ObjectId(id) : id;
     updateFields.updatedAt = new Date();
-    const res = await this.getCollection().updateOne({ _id }, { $set: updateFields });
+    const res = await this.getCollection().updateOne(
+      { _id },
+      { $set: updateFields }
+    );
     return res.modifiedCount > 0;
   }
 
   async delete(id) {
     const _id = typeof id === "string" ? new ObjectId(id) : id;
-    const res = await this.getCollection().updateOne({ _id }, { $set: { deletedAt: new Date() } });
+    const res = await this.getCollection().updateOne(
+      { _id },
+      { $set: { deletedAt: new Date() } }
+    );
     return res.modifiedCount > 0;
   }
 
   async findByEmail(email) {
     return await this.getCollection().findOne({ email, deletedAt: null });
   }
-  
+
   async findByCredentials(username, password) {
-    return await this.getCollection().findOne({ username, password, deletedAt: null });
+    return await this.getCollection().findOne({
+      username,
+      password,
+      deletedAt: null,
+    });
   }
 }
 

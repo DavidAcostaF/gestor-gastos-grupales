@@ -1,8 +1,8 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const SALT_ROUNDS = 10;
 
 module.exports = function buildUsersController({ userRepo }) {
-  if (!userRepo) throw new Error('userRepo es requerido en users.controller');
+  if (!userRepo) throw new Error("userRepo es requerido en users.controller");
 
   return {
     createUser: async (req, res, next) => {
@@ -21,7 +21,7 @@ module.exports = function buildUsersController({ userRepo }) {
         const newUser = {
           name,
           email,
-          password: hashed,           
+          password: hashed,
           avatarUrl: avatarUrl || null,
           status: "active",
           createdAt: now,
@@ -55,7 +55,7 @@ module.exports = function buildUsersController({ userRepo }) {
       try {
         const user = await userRepo.getById(req.params.id);
         if (!user) {
-          const err = new Error('Usuario no encontrado');
+          const err = new Error("Usuario no encontrado");
           err.status = 404;
           throw err;
         }
@@ -97,7 +97,7 @@ module.exports = function buildUsersController({ userRepo }) {
       try {
         const ok = await userRepo.delete(req.params.id);
         if (!ok) {
-          const err = new Error('Usuario no encontrado o no eliminado');
+          const err = new Error("Usuario no encontrado o no eliminado");
           err.status = 404;
           throw err;
         }

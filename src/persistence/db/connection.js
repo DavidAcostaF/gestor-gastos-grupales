@@ -27,7 +27,13 @@ async function closeDB() {
   }
 }
 
-process.on("SIGINT", async () => { await closeDB(); process.exit(0); });
-process.on("SIGTERM", async () => { await closeDB(); process.exit(0); });
+process.on("SIGINT", async () => {
+  await closeDB();
+  process.exit(0);
+});
+process.on("SIGTERM", async () => {
+  await closeDB();
+  process.exit(0);
+});
 
 module.exports = { connectDB, closeDB };
