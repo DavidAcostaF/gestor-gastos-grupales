@@ -16,6 +16,7 @@ import errorHandler from './middlewares/errorHandler.js';
 import buildAuthRouter from "./routes/auth.routes.js";
 import buildGroupsRouter from "./routes/groups.routes.js";
 import buildExpensesRouter from './routes/expenses.routes.js';
+import buildBudgetsRouter from './routes/budget.routes.js';
 import buildUsersRouter from './routes/users.routes.js';
 
 
@@ -24,6 +25,7 @@ import verifyToken from './middlewares/auth.middleware.js';
 import UserRepository from './persistence/repositories/UserRepository.js';
 import GroupRepository from './persistence/repositories/GroupRepository.js';
 import ExpenseRepository from './persistence/repositories/ExpenseRepository.js';
+import BudgetRepository from './persistence/repositories/BudgetRepository.js';
 const app = express();
 const db = await connectDB();
 
@@ -31,6 +33,7 @@ const db = await connectDB();
 const userRepo = new UserRepository(db);
 const groupRepo = new GroupRepository(db);
 const expenseRepo = new ExpenseRepository(db);
+const budgetRepo = new BudgetRepository(db);
 
 app.use(json());
 
@@ -47,6 +50,7 @@ app.use('/api/v1/protected', protectedRoutes)
 app.use('/api/v1/users', buildUsersRouter({ userRepo, verifyToken }));
 app.use('/api/v1/expenses',verifyToken, buildExpensesRouter({ expenseRepo }));
 app.use('/api/v1/groups',verifyToken, buildGroupsRouter({ groupRepo }));
+app.use('/api/v1/budgets', buildBudgetsRouter({ budgetRepo, verifyToken }));
 
 // Manejadores de errores
 app.use(notFoundHandler);
