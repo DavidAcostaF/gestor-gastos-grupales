@@ -15,24 +15,28 @@ import errorHandler from './middlewares/errorHandler.js';
 
 import buildAuthRouter from "./routes/auth.routes.js";
 import buildGroupsRouter from "./routes/groups.routes.js";
+import buildExpensesRouter from './routes/expenses.routes.js';
 
 
 import protectedRoutes from "./routes/protected.routes.js";
 import verifyToken from './middlewares/auth.middleware.js';
 import UserRepository from './persistence/repositories/UserRepository.js';
 import GroupRepository from './persistence/repositories/GroupRepository.js';
+import ExpenseRepository from './persistence/repositories/ExpenseRepository.js';
 const app = express();
 const db = await connectDB();
 
 
 const userRepo = new UserRepository(db);
 const groupRepo = new GroupRepository(db);
+const expenseRepo = new ExpenseRepository(db);
 
 app.use(json());
 
 
 // Ruta de autenticación
 app.use('/api/v1/auth', buildAuthRouter({ userRepo }));
+app.use('/api/v1/expenses', buildExpensesRouter({ expenseRepo }));
 
 app.use('/api/v1/protected', protectedRoutes)
 
