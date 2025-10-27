@@ -7,18 +7,24 @@ class PaymentRepository extends BaseRepository {
   }
 
   async create(paymentObj) {
+    if (paymentObj.groupId && typeof paymentObj.groupId === "string")
+      paymentObj.groupId = new ObjectId(paymentObj.groupId);
+    if (paymentObj.userId && typeof paymentObj.userId === "string")
+      paymentObj.userId = new ObjectId(paymentObj.userId);
+    if (paymentObj.approvedBy && typeof paymentObj.approvedBy === "string")
+      paymentObj.approvedBy = new ObjectId(paymentObj.approvedBy);
+
     const result = await this.getCollection().insertOne(paymentObj);
     return result.insertedId;
   }
 
   async getById(id) {
     const _id = typeof id === "string" ? new ObjectId(id) : id;
-    return await this.getCollection().findOne({ _id, deletedAt: null });
+    return this.getCollection().findOne({ _id, deletedAt: null });
   }
 
   async getAll(filter = {}) {
-    const base = { deletedAt: null, ...filter };
-    return await this.getCollection().find(base).toArray();
+    return this.getCollection().find({ deletedAt: null, ...filter }).toArray();
   }
 
   async update(id, updateFields) {
@@ -39,7 +45,6 @@ class PaymentRepository extends BaseRepository {
     );
     return res.modifiedCount > 0;
   }
-
 }
 
 module.exports = PaymentRepository;

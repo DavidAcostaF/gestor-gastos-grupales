@@ -28,6 +28,7 @@ class Payment {
     this.approvedAt = approvedAt;
     this.createdAt = now;
     this.updatedAt = now;
+    this.deletedAt = null;
   }
 }
 

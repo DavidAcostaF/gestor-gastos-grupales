@@ -1,63 +1,86 @@
-const { ObjectId } = require("mongodb");
-
-module.exports = function buildPaymentsController({ paymentRepo }) {
+export default function buildPaymentsController({ paymentRepo }) {
   if (!paymentRepo) {
     throw new Error("paymentRepo es requerido en payments.controller");
   }
 
   return {
+    /**
+     * @route POST /api/v1/payments
+     * @desc Crea un nuevo pago
+     */
     createPayment: async (req, res, next) => {
       try {
-        const { groupId, amount, method, date, reference, receiptUrl, note } =
-          req.body;
-        const userId = req.user.id;
+        const {
+          groupId,
+          userId,
+          amount,
+          method,
+          date,
+          reference,
+          receiptUrl,
+          note,
+          status,
+          approvedBy,
+          approvedAt,
+        } = req.body || {};
 
-        if (!groupId || !amount || !method) {
-          const err = new Error("groupId, amount y method son obligatorios");
+          if (!groupId || !userId || !amount || !method) {
+          const err = new Error(
+            "groupId, userId, amount y method son obligatorios"
+          );
           err.status = 400;
           throw err;
         }
 
         const now = new Date();
-        const newPayment = {
+        const doc = {
           groupId,
           userId,
           amount,
-          date: date ? new Date(date) : new Date(),
           method,
+          date: date ? new Date(date) : now,
           reference: reference || "",
           receiptUrl: receiptUrl || "",
           note: note || "",
-          status: "pending",
-          approvedBy: null,
-          approvedAt: null,
+          status: status || "pending",
+          approvedBy: approvedBy || null,
+          approvedAt: approvedAt || null,
           createdAt: now,
           updatedAt: now,
           deletedAt: null,
         };
 
-        const insertedId = await paymentRepo.create(newPayment);
-        const created = await paymentRepo.getById(insertedId);
+        const id = await paymentRepo.create(doc);
+        const created = await paymentRepo.getById(id);
+
         return res.status(201).json({ success: true, data: created });
       } catch (error) {
         next(error);
       }
     },
 
+    /**
+     * @route GET /api/v1/payments
+     * @desc Obtiene todos los pagos (con filtros)
+     */
     getPayments: async (req, res, next) => {
       try {
         const filter = {};
+        if (req.query.groupId) filter.groupId = req.query.groupId;
+        if (req.query.userId) filter.userId = req.query.userId;
         if (req.query.status) filter.status = req.query.status;
-        if (req.query.groupId) filter.groupId = new ObjectId(req.query.groupId);
-        if (req.query.userId) filter.userId = new ObjectId(req.query.userId);
 
         const payments = await paymentRepo.getAll(filter);
-        return res.json({ success: true, data: payments });
+        res.json({ success: true, data: payments });
       } catch (error) {
         next(error);
       }
     },
 
+    /**
+     * @route GET /api/v1/payments/:id
+     * @desc Obtiene un pago por ID
+     */
     getPaymentById: async (req, res, next) => {
       try {
         const payment = await paymentRepo.getById(req.params.id);
@@ -66,37 +89,42 @@ module.exports = function buildPaymentsController({ paymentRepo }) {
           err.status = 404;
           throw err;
         }
-        return res.json({ success: true, data: payment });
+        res.json({ success: true, data: payment });
       } catch (error) {
         next(error);
       }
     },
 
+    /**
+     * @route PATCH /api/v1/payments/:id
+     * @desc Actualiza un pago
+     */
     updatePayment: async (req, res, next) => {
       try {
-        const { id } = req.params;
         const updateFields = { ...req.body, updatedAt: new Date() };
-
         delete updateFields._id;
         delete updateFields.createdAt;
         delete updateFields.deletedAt;
         delete updateFields.userId;
-        delete updateFields.groupId; 
+        delete updateFields.groupId;
 
-        const ok = await paymentRepo.update(id, updateFields);
+        const ok = await paymentRepo.update(req.params.id, updateFields);
         if (!ok) {
           const err = new Error("Pago no encontrado o no actualizado");
           err.status = 404;
           throw err;
         }
-
-        const updated = await paymentRepo.getById(id);
-        return res.json({ success: true, data: updated });
+        const updated = await paymentRepo.getById(req.params.id);
+        res.json({ success: true, data: updated });
       } catch (error) {
         next(error);
       }
     },
 
+    /**
+     * @route DELETE /api/v1/payments/:id
+     * @desc Elimina un pago
+     */
     deletePayment: async (req, res, next) => {
       try {
         const ok = await paymentRepo.delete(req.params.id);
@@ -105,10 +133,10 @@ module.exports = function buildPaymentsController({ paymentRepo }) {
           err.status = 404;
           throw err;
         }
-        return res.status(204).send();
+        res.status(204).send();
       } catch (error) {
         next(error);
       }
     },
   };
-};
+}
