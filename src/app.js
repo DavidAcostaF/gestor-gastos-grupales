@@ -8,25 +8,45 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 import express, { json } from "express";
 import { connectDB, closeDB } from "./persistence/db/connection.js";
-import notFoundHandler from "./middlewares/notFoundHandler.js";
-import errorHandler from "./middlewares/errorHandler.js";
+
+import notFoundHandler from './middlewares/notFoundHandler.js';
+import errorHandler from './middlewares/errorHandler.js';
+
 import buildAuthRouter from "./routes/auth.routes.js";
+import buildGroupsRouter from "./routes/groups.routes.js";
+import buildExpensesRouter from './routes/expenses.routes.js';
+
+
 import protectedRoutes from "./routes/protected.routes.js";
-import verifyToken from "./middlewares/auth.middleware.js";
-import UserRepository from "./persistence/repositories/UserRepository.js";
+
+import verifyToken from './middlewares/auth.middleware.js';
+import UserRepository from './persistence/repositories/UserRepository.js';
+import GroupRepository from './persistence/repositories/GroupRepository.js';
+import ExpenseRepository from './persistence/repositories/ExpenseRepository.js';
 import PaymentRepository from "./persistence/repositories/PaymentRepository.js";
+
 const app = express();
 const db = await connectDB();
 
 const userRepo = new UserRepository(db);
+
+
+const groupRepo = new GroupRepository(db);
+const expenseRepo = new ExpenseRepository(db);
 const paymentRepo = new PaymentRepository(db);
 
 app.use(json());
 
 // Ruta de autenticación
-app.use("/api/v1/auth", buildAuthRouter({ userRepo }));
 
-app.use("/api/v1/protected", protectedRoutes);
+app.use('/api/v1/auth', buildAuthRouter({ userRepo }));
+app.use('/api/v1/expenses', buildExpensesRouter({ expenseRepo }));
+
+app.use('/api/v1/protected', protectedRoutes)
+
+// Manejadores de errores
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Rutas de los demas CRUDs
 // Inyección de dependencias mejor practica
@@ -39,9 +59,8 @@ app.use("/api/v1/payments", buildPaymentsRouter({ paymentRepo, verifyToken }));
 // A partir de aquí, todas requieren token
 app.use(verifyToken);
 
-// Manejadores de errores
-app.use(notFoundHandler);
-app.use(errorHandler);
+app.use('/api/v1/groups', buildGroupsRouter({ groupRepo }));
+
 
 const PORT = process.env.PORT || 3000;
 
