@@ -29,6 +29,9 @@ app.use('/api/v1/auth', buildAuthRouter({ userRepo }));
 
 app.use('/api/v1/protected', protectedRoutes)
 
+// Manejadores de errores
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Rutas de los demas CRUDs
 // Inyección de dependencias mejor practica
@@ -38,9 +41,6 @@ app.use('/api/v1/users', buildUsersRouter({ userRepo, verifyToken }));
 // A partir de aquí, todas requieren token
 app.use(verifyToken)
 
-// Manejadores de errores
-app.use(notFoundHandler);
-app.use(errorHandler);
 
 
 const PORT = process.env.PORT || 3000;
