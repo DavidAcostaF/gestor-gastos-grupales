@@ -48,12 +48,8 @@ app.use('/api/v1/users', buildUsersRouter({ userRepo, verifyToken }));
 // A partir de aquí, todas requieren token
 app.use(verifyToken)
 
-
 app.use('/api/v1/groups', buildGroupsRouter({ groupRepo }));
 
-// Manejadores de errores
-app.use(notFoundHandler);
-app.use(errorHandler);
 
 
 const PORT = process.env.PORT || 3000;
