@@ -25,13 +25,13 @@ class GroupRepository extends BaseRepository{
   async update(id, updateFields) {
     const _id = typeof id === "string" ? new ObjectId(id) : id;
     updateFields.updatedAt = new Date();
-    const res = awaitthis.getCollection().updateOne({ _id }, { $set: updateFields });
+    const res = await this.getCollection().updateOne({ _id }, { $set: updateFields });
     return res.modifiedCount > 0;
   }
 
   async delete(id) {
     const _id = typeof id === "string" ? new ObjectId(id) : id;
-    const res = this.getCollection().updateOne({ _id }, { $set: { deletedAt: new Date() } });
+    const res = await this.getCollection().updateOne({ _id }, { $set: { deletedAt: new Date() } });
     return res.modifiedCount > 0;
   }
 
