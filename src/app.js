@@ -15,6 +15,7 @@ import errorHandler from './middlewares/errorHandler.js';
 import buildAuthRouter from "./routes/auth.routes.js";
 import buildGroupsRouter from "./routes/groups.routes.js";
 import buildExpensesRouter from './routes/expenses.routes.js';
+import buildUsersRouter from './routes/users.routes.js';
 
 
 import protectedRoutes from "./routes/protected.routes.js";
@@ -40,9 +41,16 @@ app.use(json());
 // Ruta de autenticación
 
 app.use('/api/v1/auth', buildAuthRouter({ userRepo }));
-app.use('/api/v1/expenses', buildExpensesRouter({ expenseRepo }));
 
 app.use('/api/v1/protected', protectedRoutes)
+
+
+
+// Rutas de los demas CRUDs
+// Inyección de dependencias mejor practica
+app.use('/api/v1/users', buildUsersRouter({ userRepo, verifyToken }));
+app.use('/api/v1/expenses',verifyToken, buildExpensesRouter({ expenseRepo }));
+app.use('/api/v1/groups',verifyToken, buildGroupsRouter({ groupRepo }));
 
 // Manejadores de errores
 app.use(notFoundHandler);
@@ -60,7 +68,6 @@ app.use("/api/v1/payments", buildPaymentsRouter({ paymentRepo, verifyToken }));
 app.use(verifyToken);
 
 app.use('/api/v1/groups', buildGroupsRouter({ groupRepo }));
-
 
 const PORT = process.env.PORT || 3000;
 
