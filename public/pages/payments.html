@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pagos - Gestor de Gastos Grupales</title>
+        <link rel="stylesheet" href="/css/styles.css">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet">
+    </head>
+    <body>
+        <div class="app-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-logo">
+                        <span>$</span> SplitWise
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-section">
+                        <div class="nav-section-title">Principal</div>
+                        <a href="/pages/dashboard.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            Dashboard
+                        </a>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">Gestión</div>
+                        <a href="/pages/groups.html" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            Grupos
+                        </a>
+                        <a href="/pages/expenses.html" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            Gastos
+                        </a>
+                        <a href="/pages/budgets.html" class="nav-link">
+                            <i class="fas fa-piggy-bank"></i>
+                            Presupuestos
+                        </a>
+                        <a href="/pages/payments.html" class="nav-link active">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Pagos
+                        </a>
+                    </div>
+
+                    <div class="nav-section">
+                        <div class="nav-section-title">Administración</div>
+                        <a href="/pages/users.html" class="nav-link">
+                            <i class="fas fa-user-cog"></i>
+                            Usuarios
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="user-info">
+                        <div class="user-avatar" id="user-avatar">U</div>
+                        <div class="user-details">
+                            <div class="user-name" id="user-name">Usuario</div>
+                            <div class="user-email"
+                                id="user-email">email@example.com</div>
+                        </div>
+                        <button class="btn btn-ghost btn-icon"
+                            onclick="logout()" title="Cerrar sesión">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <header class="main-header">
+                    <div class="header-left">
+                        <button class="menu-toggle" onclick="toggleSidebar()">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="page-title">Pagos</h1>
+                    </div>
+                    <div class="header-right">
+                        <button class="btn btn-primary"
+                            onclick="openModal('create')">
+                            <i class="fas fa-plus"></i>
+                            Registrar Pago
+                        </button>
+                    </div>
+                </header>
+
+                <div class="main-container">
+                    <!-- Stats Cards -->
+                    <div class="cards-grid">
+                        <div class="card stat-card">
+                            <div class="stat-icon success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <p class="stat-label">Pagos Completados</p>
+                                <h3 class="stat-value"
+                                    id="completed-payments">0</h3>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon warning">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <p class="stat-label">Pagos Pendientes</p>
+                                <h3 class="stat-value"
+                                    id="pending-payments">0</h3>
+                            </div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-icon primary">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="stat-info">
+                                <p class="stat-label">Total Pagado</p>
+                                <h3 class="stat-value" id="total-paid">$0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payments Table -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Historial de Pagos</h3>
+                            <div class="table-actions">
+                                <select class="form-select" id="status-filter"
+                                    style="width: 150px;"
+                                    onchange="filterPayments()">
+                                    <option value>Todos</option>
+                                    <option
+                                        value="completed">Completados</option>
+                                    <option value="pending">Pendientes</option>
+                                    <option
+                                        value="cancelled">Cancelados</option>
+                                </select>
+                                <input type="text" class="form-input"
+                                    placeholder="Buscar..." id="search-input"
+                                    style="width: 200px;"
+                                    onkeyup="filterPayments()">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Pagador</th>
+                                        <th>Receptor</th>
+                                        <th>Grupo</th>
+                                        <th>Monto</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payments-table">
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="loading">
+                                                <div class="spinner"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Modal Create/Edit Payment -->
+        <div class="modal-overlay" id="payment-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modal-title">Registrar Pago</h3>
+                    <button class="modal-close"
+                        onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="payment-form">
+                        <input type="hidden" id="payment-id">
+
+                        <div class="form-group">
+                            <label for="payment-group" class="form-label">Grupo
+                                *</label>
+                            <select id="payment-group" class="form-select"
+                                required onchange="loadGroupMembers()">
+                                <option value>Seleccionar grupo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="payment-from" class="form-label">Pagador
+                                *</label>
+                            <select id="payment-from" class="form-select"
+                                required>
+                                <option value>Seleccionar pagador</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="payment-to" class="form-label">Receptor
+                                *</label>
+                            <select id="payment-to" class="form-select"
+                                required>
+                                <option value>Seleccionar receptor</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="payment-amount" class="form-label">Monto
+                                *</label>
+                            <input type="number" id="payment-amount"
+                                class="form-input" placeholder="0.00"
+                                step="0.01" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="payment-status"
+                                class="form-label">Estado</label>
+                            <select id="payment-status" class="form-select">
+                                <option value="pending">Pendiente</option>
+                                <option value="completed">Completado</option>
+                                <option value="cancelled">Cancelado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="payment-date" class="form-label">Fecha
+                                del pago</label>
+                            <input type="date" id="payment-date"
+                                class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="payment-notes"
+                                class="form-label">Notas</label>
+                            <textarea id="payment-notes" class="form-textarea"
+                                rows="3"
+                                placeholder="Notas adicionales..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost"
+                        onclick="closeModal()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="savePayment()"
+                        id="save-btn">
+                        <i class="fas fa-save"></i>
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Confirm Delete -->
+        <div class="modal-overlay" id="delete-modal">
+            <div class="modal" style="max-width: 400px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Confirmar eliminación</h3>
+                    <button class="modal-close"
+                        onclick="closeDeleteModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar este pago?</p>
+                    <input type="hidden" id="delete-payment-id">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost"
+                        onclick="closeDeleteModal()">Cancelar</button>
+                    <button class="btn btn-danger" onclick="confirmDelete()">
+                        <i class="fas fa-trash"></i>
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast-container" id="toast-container"></div>
+
+        <script src="/js/api.js"></script>
+        <script src="/js/auth.js"></script>
+        <script>
+    let allPayments = [];
+    let allGroups = [];
+    let allUsers = [];
+
+    // Verificar autenticación
+    checkAuth();
+    loadUserInfo();
+    loadData();
+
+    async function loadData() {
+      await Promise.all([loadGroups(), loadUsers()]);
+      await loadPayments();
+    }
+
+    async function loadGroups() {
+      try {
+        const response = await apiRequest('/api/v1/groups');
+        if (response.success) {
+          allGroups = response.data;
+          populateGroupSelect();
+        }
+      } catch (error) {
+        console.error('Error loading groups:', error);
+      }
+    }
+
+    async function loadUsers() {
+      try {
+        const response = await apiRequest('/api/v1/users');
+        if (response.success) {
+          allUsers = response.data;
+        }
+      } catch (error) {
+        console.error('Error loading users:', error);
+      }
+    }
+
+    function populateGroupSelect() {
+      const select = document.getElementById('payment-group');
+      const options = allGroups.map(g => `<option value="${g._id}">${g.name}</option>`).join('');
+      select.innerHTML = `<option value="">Seleccionar grupo</option>` + options;
+    }
+
+    function loadGroupMembers() {
+      const groupId = document.getElementById('payment-group').value;
+      const fromSelect = document.getElementById('payment-from');
+      const toSelect = document.getElementById('payment-to');
+      
+      if (!groupId) {
+        fromSelect.innerHTML = '<option value="">Seleccionar pagador</option>';
+        toSelect.innerHTML = '<option value="">Seleccionar receptor</option>';
+        return;
+      }
+
+      const group = allGroups.find(g => g._id === groupId);
+      if (group && group.members) {
+        const memberOptions = group.members.map(memberId => {
+          const user = allUsers.find(u => u._id === memberId);
+          return user ? `<option value="${user._id}">${user.name || user.email}</option>` : '';
+        }).join('');
+        
+        fromSelect.innerHTML = '<option value="">Seleccionar pagador</option>' + memberOptions;
+        toSelect.innerHTML = '<option value="">Seleccionar receptor</option>' + memberOptions;
+      } else {
+        // Si no hay miembros definidos, mostrar todos los usuarios
+        const userOptions = allUsers.map(u => `<option value="${u._id}">${u.name || u.email}</option>`).join('');
+        fromSelect.innerHTML = '<option value="">Seleccionar pagador</option>' + userOptions;
+        toSelect.innerHTML = '<option value="">Seleccionar receptor</option>' + userOptions;
+      }
+    }
+
+    async function loadPayments() {
+      try {
+        const response = await apiRequest('/api/v1/payments');
+        if (response.success) {
+          allPayments = response.data;
+          renderPayments(allPayments);
+          updateStats();
+        }
+      } catch (error) {
+        showToast('Error al cargar pagos', 'error');
+      }
+    }
+
+    function updateStats() {
+      const completed = allPayments.filter(p => p.status === 'completed');
+      const pending = allPayments.filter(p => p.status === 'pending');
+      const totalPaid = completed.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+      document.getElementById('completed-payments').textContent = completed.length;
+      document.getElementById('pending-payments').textContent = pending.length;
+      document.getElementById('total-paid').textContent = formatCurrency(totalPaid);
+    }
+
+    function renderPayments(payments) {
+      const tbody = document.getElementById('payments-table');
+      
+      if (payments.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <i class="fas fa-money-bill-wave"></i>
+                <h3>No hay pagos registrados</h3>
+                <p>Registra el primer pago entre miembros del grupo</p>
+                <button class="btn btn-primary mt-2" onclick="openModal('create')">
+                  <i class="fas fa-plus"></i> Registrar Pago
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = payments.map(payment => {
+        const fromUser = allUsers.find(u => u._id === payment.fromUserId);
+        const toUser = allUsers.find(u => u._id === payment.toUserId);
+        const group = allGroups.find(g => g._id === payment.groupId);
+        
+        const statusClass = {
+          'completed': 'success',
+          'pending': 'warning',
+          'cancelled': 'danger'
+        }[payment.status] || 'info';
+
+        const statusText = {
+          'completed': 'Completado',
+          'pending': 'Pendiente',
+          'cancelled': 'Cancelado'
+        }[payment.status] || payment.status;
+        
+        return `
+          <tr>
+            <td>
+              <div class="flex items-center" style="gap: 0.5rem;">
+                <div class="avatar-sm">${(fromUser?.name || 'U').charAt(0)}</div>
+                <span>${fromUser?.name || fromUser?.email || '-'}</span>
+              </div>
+            </td>
+            <td>
+              <div class="flex items-center" style="gap: 0.5rem;">
+                <div class="avatar-sm">${(toUser?.name || 'U').charAt(0)}</div>
+                <span>${toUser?.name || toUser?.email || '-'}</span>
+              </div>
+            </td>
+            <td>${group?.name || '-'}</td>
+            <td><strong>${formatCurrency(payment.amount)}</strong></td>
+            <td><span class="badge badge-${statusClass}">${statusText}</span></td>
+            <td>${payment.date ? new Date(payment.date).toLocaleDateString('es-MX') : '-'}</td>
+            <td>
+              <div class="flex" style="gap: 0.5rem;">
+                ${payment.status === 'pending' ? `
+                  <button class="btn btn-sm btn-success" onclick="markAsCompleted('${payment._id}')" title="Marcar como completado">
+                    <i class="fas fa-check"></i>
+                  </button>
+                ` : ''}
+                <button class="btn btn-sm btn-ghost" onclick="openModal('edit', '${payment._id}')" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-ghost" onclick="openDeleteModal('${payment._id}')" title="Eliminar">
+                  <i class="fas fa-trash" style="color: var(--danger-color);"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterPayments() {
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+      const statusFilter = document.getElementById('status-filter').value;
+      
+      let filtered = allPayments;
+      
+      if (statusFilter) {
+        filtered = filtered.filter(p => p.status === statusFilter);
+      }
+      
+      if (searchTerm) {
+        filtered = filtered.filter(payment => {
+          const fromUser = allUsers.find(u => u._id === payment.fromUserId);
+          const toUser = allUsers.find(u => u._id === payment.toUserId);
+          const group = allGroups.find(g => g._id === payment.groupId);
+          
+          return (fromUser?.name?.toLowerCase().includes(searchTerm)) ||
+                 (toUser?.name?.toLowerCase().includes(searchTerm)) ||
+                 (group?.name?.toLowerCase().includes(searchTerm));
+        });
+      }
+      
+      renderPayments(filtered);
+    }
+
+    async function markAsCompleted(paymentId) {
+      try {
+        const response = await apiRequest(`/api/v1/payments/${paymentId}`, 'PATCH', { status: 'completed' });
+        if (response.success) {
+          showToast('Pago marcado como completado', 'success');
+          loadPayments();
+        }
+      } catch (error) {
+        showToast('Error al actualizar pago', 'error');
+      }
+    }
+
+    function openModal(mode, paymentId = null) {
+      const modal = document.getElementById('payment-modal');
+      const title = document.getElementById('modal-title');
+      const form = document.getElementById('payment-form');
+      
+      form.reset();
+      document.getElementById('payment-id').value = '';
+      document.getElementById('payment-date').value = new Date().toISOString().split('T')[0];
+
+      if (mode === 'create') {
+        title.textContent = 'Registrar Pago';
+      } else {
+        title.textContent = 'Editar Pago';
+        const payment = allPayments.find(p => p._id === paymentId);
+        if (payment) {
+          document.getElementById('payment-id').value = payment._id;
+          document.getElementById('payment-group').value = payment.groupId || '';
+          loadGroupMembers();
+          setTimeout(() => {
+            document.getElementById('payment-from').value = payment.fromUserId || '';
+            document.getElementById('payment-to').value = payment.toUserId || '';
+          }, 100);
+          document.getElementById('payment-amount').value = payment.amount || '';
+          document.getElementById('payment-status').value = payment.status || 'pending';
+          document.getElementById('payment-date').value = payment.date ? payment.date.split('T')[0] : '';
+          document.getElementById('payment-notes').value = payment.notes || '';
+        }
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('payment-modal').classList.remove('active');
+    }
+
+    async function savePayment() {
+      const id = document.getElementById('payment-id').value;
+      const groupId = document.getElementById('payment-group').value;
+      const fromUserId = document.getElementById('payment-from').value;
+      const toUserId = document.getElementById('payment-to').value;
+      const amount = parseFloat(document.getElementById('payment-amount').value);
+      const status = document.getElementById('payment-status').value;
+      const date = document.getElementById('payment-date').value;
+      const notes = document.getElementById('payment-notes').value;
+
+      if (!groupId || !fromUserId || !toUserId || !amount) {
+        showToast('Completa los campos obligatorios', 'error');
+        return;
+      }
+
+      if (fromUserId === toUserId) {
+        showToast('El pagador y receptor deben ser diferentes', 'error');
+        return;
+      }
+
+      const data = { 
+        groupId, 
+        fromUserId, 
+        toUserId, 
+        amount, 
+        status,
+        date: date || null,
+        notes 
+      };
+      
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true;
+
+      try {
+        let response;
+        if (id) {
+          response = await apiRequest(`/api/v1/payments/${id}`, 'PATCH', data);
+        } else {
+          response = await apiRequest('/api/v1/payments', 'POST', data);
+        }
+
+        if (response.success) {
+          showToast(id ? 'Pago actualizado' : 'Pago registrado', 'success');
+          closeModal();
+          loadPayments();
+        } else {
+          showToast(response.message || 'Error al guardar', 'error');
+        }
+      } catch (error) {
+        showToast('Error al guardar pago', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function openDeleteModal(paymentId) {
+      document.getElementById('delete-payment-id').value = paymentId;
+      document.getElementById('delete-modal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').classList.remove('active');
+    }
+
+    async function confirmDelete() {
+      const id = document.getElementById('delete-payment-id').value;
+      
+      try {
+        const response = await apiRequest(`/api/v1/payments/${id}`, 'DELETE');
+        if (response.success) {
+          showToast('Pago eliminado', 'success');
+          closeDeleteModal();
+          loadPayments();
+        } else {
+          showToast('Error al eliminar', 'error');
+        }
+      } catch (error) {
+        showToast('Error al eliminar pago', 'error');
+      }
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN'
+      }).format(amount || 0);
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+  </script>
+
+        <style>
+    .avatar-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+
+    .btn-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .items-center {
+      align-items: center;
+    }
+  </style>
+    </body>
+</html>
