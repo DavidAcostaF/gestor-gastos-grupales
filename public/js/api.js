@@ -30,7 +30,22 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    const result = await response.json();
+
+    // Manejar respuestas sin cuerpo (204 No Content) o contenidos no JSON
+    const contentType = response.headers.get('content-type') || '';
+    let result = null;
+
+    if (response.status === 204 || !contentType.includes('application/json')) {
+      // Devuelve un resultado básico indicando éxito según el status
+      result = { success: response.status >= 200 && response.status < 300 };
+    } else {
+      try {
+        result = await response.json();
+      } catch (err) {
+        // Si falla el parseo JSON, devolver un objeto básico
+        result = { success: response.status >= 200 && response.status < 300 };
+      }
+    }
 
     // Si el token expiró o es inválido
     if (response.status === 401) {
