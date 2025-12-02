@@ -1,12 +1,9 @@
-  import { Router } from "express";
+import { Router } from "express";
 import buildPaymentsController from "../controllers/payment.controller.js";
 
 export default function buildPaymentsRouter({ paymentRepo }) {
-  
   if (!paymentRepo) {
-
     throw new Error("paymentRepo es requerido en payments.routes");
-
   }
 
   const router = Router();
@@ -19,5 +16,4 @@ export default function buildPaymentsRouter({ paymentRepo }) {
   router.delete("/:id", controller.deletePayment);
 
   return router;
-
 }

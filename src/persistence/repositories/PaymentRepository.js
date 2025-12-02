@@ -2,10 +2,8 @@ import { ObjectId } from "mongodb";
 import BaseRepository from "./BaseRepository.js";
 
 class PaymentRepository extends BaseRepository {
-
   constructor(db) {
     super("payments", db);
-
   }
 
   async create(paymentObj) {
@@ -18,19 +16,18 @@ class PaymentRepository extends BaseRepository {
 
     const result = await this.getCollection().insertOne(paymentObj);
     return result.insertedId;
-
   }
 
   async getById(id) {
     const _id = typeof id === "string" ? new ObjectId(id) : id;
     return this.getCollection().findOne({ _id, deletedAt: null });
-
   }
 
   async getAll(filter = {}) {
-    return this.getCollection().find({ deletedAt: null, ...filter }).toArray();
+    return this.getCollection()
+      .find({ deletedAt: null, ...filter })
+      .toArray();
   }
-
 
   async update(id, updateFields) {
     const _id = typeof id === "string" ? new ObjectId(id) : id;
@@ -49,9 +46,7 @@ class PaymentRepository extends BaseRepository {
       { $set: { deletedAt: new Date() } }
     );
     return res.modifiedCount > 0;
-  
   }
-
 }
 
 export default PaymentRepository;
