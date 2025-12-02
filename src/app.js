@@ -6,7 +6,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-import express, { json } from "express";
+
+import express, { json } from 'express';
+import cors from 'cors';
 import { connectDB, closeDB } from "./persistence/db/connection.js";
 import notFoundHandler from "./middlewares/notFoundHandler.js";
 import errorHandler from "./middlewares/errorHandler.js";
@@ -36,7 +38,13 @@ const expenseRepo = new ExpenseRepository(db);
 const budgetRepo = new BudgetRepository(db);
 const paymentRepo = new PaymentRepository(db);
 
+// Middleware
+app.use(cors());
 app.use(json());
+
+// Servir archivos estáticos del frontend
+app.use(express.static(path.join(__dirname, '../public')));
+
 
 // Ruta de autenticación
 app.use("/api/v1/auth", buildAuthRouter({ userRepo }));
@@ -47,11 +55,11 @@ app.use("/api/v1/protected", protectedRoutes);
 // Inyección de dependencias mejor practica
 app.use("/api/v1/users", buildUsersRouter({ userRepo, verifyToken }));
 app.use("/api/v1/expenses", verifyToken, buildExpensesRouter({ expenseRepo }));
-app.use("/api/v1/groups", verifyToken, buildGroupsRouter({ groupRepo }));
+app.use("/api/v1/groups", verifyToken, buildGroupsRouter({ groupRepo, expenseRepo, paymentRepo, userRepo }));
 app.use("/api/v1/budgets", buildBudgetsRouter({ budgetRepo, verifyToken }));
 
-import buildPaymentsRouter from "./routes/payments.routes.js";
-app.use("/api/v1/payments", buildPaymentsRouter({ paymentRepo, verifyToken }));
+import buildPaymentsRouter from "./routes/payment.routes.js";
+app.use("/api/v1/payments", verifyToken, buildPaymentsRouter({ paymentRepo }));
 
 // Manejadores de errores
 app.use(notFoundHandler);

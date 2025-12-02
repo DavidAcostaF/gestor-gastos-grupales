@@ -1,6 +1,7 @@
-const { MongoClient } = require("mongodb");
+import { MongoClient } from "mongodb";
+import dotenv from "dotenv";
 
-require("dotenv").config();
+dotenv.config();
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
 const dbName = process.env.DB_NAME || "expense_app";
@@ -36,4 +37,4 @@ process.on("SIGTERM", async () => {
   process.exit(0);
 });
 
-module.exports = { connectDB, closeDB };
+export { connectDB, closeDB };

@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 function verifyToken(req, res, next) {
   const auth = req.headers.authorization || "";
@@ -14,4 +14,4 @@ function verifyToken(req, res, next) {
     return res.status(401).json({ error: "Token inválido o expirado" });
   }
 }
-module.exports = verifyToken;
+export default verifyToken;
