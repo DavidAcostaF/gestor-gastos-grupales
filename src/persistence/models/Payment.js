@@ -1,6 +1,8 @@
 // models/Payment.js
 class Payment {
+
   constructor({
+    
     groupId,
     userId,
     amount,
@@ -11,13 +13,14 @@ class Payment {
     note = "",
     status = "pending",
     approvedBy = null,
-    approvedAt = null
+    approvedAt = null,
   }) {
+
     const now = new Date();
 
-    this.groupId = groupId;        
-    this.userId = userId;          
-    this.amount = amount;       
+    this.groupId = groupId;
+    this.userId = userId;
+    this.amount = amount;
     this.date = date;
     this.method = method;
     this.reference = reference;
@@ -29,7 +32,9 @@ class Payment {
     this.createdAt = now;
     this.updatedAt = now;
     this.deletedAt = null;
+
   }
+
 }
 
 module.exports = Payment;
