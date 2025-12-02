@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro - Gestor de Gastos Grupales</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <h1><span>$</span> SplitWise</h1>
+        </div>
+        
+        <h2 class="auth-title">Crea tu cuenta</h2>
+        <p class="auth-subtitle">Regístrate para empezar a gestionar gastos grupales</p>
+
+        <div id="alert-container"></div>
+
+        <form id="register-form">
+          <div class="form-group">
+            <label for="name" class="form-label">Nombre completo</label>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              class="form-input" 
+              placeholder="Tu nombre completo"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="form-input" 
+              placeholder="tu@email.com"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">Contraseña</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="form-input" 
+              placeholder="••••••••"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-password" class="form-label">Confirmar contraseña</label>
+            <input 
+              type="password" 
+              id="confirm-password" 
+              name="confirm-password" 
+              class="form-input" 
+              placeholder="Vuelve a escribir la contraseña"
+              required
+            >
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="register-btn">
+            <i class="fas fa-user-plus"></i>
+            Registrarme
+          </button>
+        </form>
+
+        <div class="auth-divider">
+          <span>o</span>
+        </div>
+
+        <a class="btn btn-outline btn-block" href="/index.html">
+          <i class="fas fa-sign-in-alt"></i>
+          Ya tengo una cuenta
+        </a>
+
+        <p class="auth-footer">
+          Al registrarte aceptas nuestros términos y condiciones.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    // Si ya está autenticado, redirigir
+    if (localStorage.getItem('token')) {
+      window.location.href = '/pages/groups.html';
+    }
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const btn = document.getElementById('register-btn');
+
+      // Validaciones básicas
+      if (!name) return showAlert('El nombre es requerido', 'error');
+      if (!isValidEmail(email)) return showAlert('Ingresa un correo válido', 'error');
+      if (password.length < 6) return showAlert('La contraseña debe tener al menos 6 caracteres', 'error');
+      if (password !== confirmPassword) return showAlert('Las contraseñas no coinciden', 'error');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+
+      try {
+        const result = await register(name, email, password);
+
+        if (result.success) {
+          // Intentar login automático después del registro
+          const loginResult = await login(email, password);
+          if (loginResult.success) {
+            showToast('Registro correcto. Bienvenido!', 'success');
+            setTimeout(() => { window.location.href = '/pages/groups.html'; }, 900);
+            return;
+          }
+
+          // Si no se pudo loguear automáticamente, redirigir a login
+          showToast('Usuario creado. Por favor inicia sesión.', 'success');
+          setTimeout(() => { window.location.href = '/index.html'; }, 900);
+        } else {
+          showAlert(result.message || 'No fue posible registrar el usuario', 'error');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-user-plus"></i> Registrarme';
+        }
+      } catch (error) {
+        showAlert('Error al conectar con el servidor', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> Registrarme';
+      }
+    });
+
+    function showAlert(message, type) {
+      const container = document.getElementById('alert-container');
+      container.innerHTML = `
+        <div class="alert alert-${type}">
+          <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>
+          ${message}
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

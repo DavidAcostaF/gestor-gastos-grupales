@@ -63,11 +63,6 @@
           <span>o</span>
         </div>
 
-        <button class="btn btn-outline btn-block" onclick="demoLogin()">
-          <i class="fas fa-user-secret"></i>
-          Acceder como Demo
-        </button>
-
         <p class="auth-footer">
           ¿No tienes cuenta? <a href="/pages/register.html">Regístrate aquí</a>
         </p>
@@ -114,12 +109,6 @@
         btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar Sesión';
       }
     });
-
-    async function demoLogin() {
-      document.getElementById('email').value = 'demo@example.com';
-      document.getElementById('password').value = 'demo123';
-      document.getElementById('login-form').dispatchEvent(new Event('submit'));
-    }
 
     function showAlert(message, type) {
       const container = document.getElementById('alert-container');
