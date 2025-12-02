@@ -1,5 +1,5 @@
 import { Router } from "express";
-import buildPaymentsController from "../controllers/payments.controller.js";
+import buildPaymentsController from "../controllers/payment.controller.js";
 
 export default function buildPaymentsRouter({ paymentRepo }) {
   if (!paymentRepo) {
