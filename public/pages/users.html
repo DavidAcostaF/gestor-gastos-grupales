@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios - Gestor de Gastos Grupales</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span>$</span> SplitWise
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Principal</div>
+          <a href="/pages/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i>
+            Dashboard
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Gestión</div>
+          <a href="/pages/groups.html" class="nav-link">
+            <i class="fas fa-users"></i>
+            Grupos
+          </a>
+          <a href="/pages/expenses.html" class="nav-link">
+            <i class="fas fa-receipt"></i>
+            Gastos
+          </a>
+          <a href="/pages/budgets.html" class="nav-link">
+            <i class="fas fa-piggy-bank"></i>
+            Presupuestos
+          </a>
+          <a href="/pages/payments.html" class="nav-link">
+            <i class="fas fa-money-bill-wave"></i>
+            Pagos
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Administración</div>
+          <a href="/pages/users.html" class="nav-link active">
+            <i class="fas fa-user-cog"></i>
+            Usuarios
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <div class="user-details">
+            <div class="user-name" id="user-name">Usuario</div>
+            <div class="user-email" id="user-email">email@example.com</div>
+          </div>
+          <button class="btn btn-ghost btn-icon" onclick="logout()" title="Cerrar sesión">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="main-header">
+        <div class="header-left">
+          <button class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">Usuarios</h1>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-primary" onclick="openModal('create')">
+            <i class="fas fa-user-plus"></i>
+            Nuevo Usuario
+          </button>
+        </div>
+      </header>
+
+      <div class="main-container">
+        <!-- Users Grid -->
+        <div class="table-container">
+          <div class="table-header">
+            <h3 class="table-title">Todos los Usuarios</h3>
+            <div class="table-actions">
+              <select class="form-select" id="filter-status" style="width: 150px;" onchange="filterUsers()">
+                <option value="">Todos</option>
+                <option value="active">Activos</option>
+                <option value="inactive">Inactivos</option>
+              </select>
+              <input type="text" class="form-input" placeholder="Buscar..." id="search-input" style="width: 180px;" onkeyup="filterUsers()">
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Email</th>
+                  <th>Estado</th>
+                  <th>Registrado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="users-table">
+                <tr>
+                  <td colspan="5" class="text-center">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Create/Edit User -->
+  <div class="modal-overlay" id="user-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Nuevo Usuario</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="user-form">
+          <input type="hidden" id="user-id">
+          
+          <div class="form-group">
+            <label for="user-name-input" class="form-label">Nombre completo *</label>
+            <input type="text" id="user-name-input" class="form-input" placeholder="Juan Pérez" required>
+          </div>
+
+          <div class="form-group">
+            <label for="user-email-input" class="form-label">Correo electrónico *</label>
+            <input type="email" id="user-email-input" class="form-input" placeholder="correo@ejemplo.com" required>
+          </div>
+
+          <div class="form-group" id="password-group">
+            <label for="user-password" class="form-label">Contraseña *</label>
+            <input type="password" id="user-password" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6">
+            <p class="form-help" id="password-help">Mínimo 6 caracteres</p>
+          </div>
+
+          <div class="form-group">
+            <label for="user-status" class="form-label">Estado</label>
+            <select id="user-status" class="form-select">
+              <option value="active">Activo</option>
+              <option value="inactive">Inactivo</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveUser()" id="save-btn">
+          <i class="fas fa-save"></i>
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Confirm Delete -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirmar eliminación</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.</p>
+        <input type="hidden" id="delete-user-id">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancelar</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">
+          <i class="fas fa-trash"></i>
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let allUsers = [];
+
+    // Verificar autenticación
+    checkAuth();
+    loadUserInfo();
+    loadUsers();
+
+    async function loadUsers() {
+      try {
+        const response = await apiRequest('/api/v1/users');
+        if (response.success) {
+          allUsers = response.data;
+          renderUsers(allUsers);
+        }
+      } catch (error) {
+        showToast('Error al cargar usuarios', 'error');
+      }
+    }
+
+    function renderUsers(users) {
+      const tbody = document.getElementById('users-table');
+      
+      if (users.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <h3>No hay usuarios</h3>
+                <p>Crea el primer usuario para comenzar</p>
+                <button class="btn btn-primary mt-2" onclick="openModal('create')">
+                  <i class="fas fa-user-plus"></i> Nuevo Usuario
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = users.map(user => `
+        <tr>
+          <td>
+            <div class="flex" style="align-items: center; gap: 0.75rem;">
+              <div class="user-avatar" style="width: 40px; height: 40px; font-size: 0.9rem;">
+                ${getInitials(user.name)}
+              </div>
+              <strong>${user.name}</strong>
+            </div>
+          </td>
+          <td>${user.email}</td>
+          <td>
+            <span class="badge ${user.status === 'active' ? 'badge-success' : 'badge-warning'}">
+              ${user.status === 'active' ? 'Activo' : 'Inactivo'}
+            </span>
+          </td>
+          <td>${formatDate(user.createdAt)}</td>
+          <td>
+            <div class="flex" style="gap: 0.5rem;">
+              <button class="btn btn-sm btn-ghost" onclick="openModal('edit', '${user._id}')" title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-ghost" onclick="openDeleteModal('${user._id}')" title="Eliminar">
+                <i class="fas fa-trash" style="color: var(--danger-color);"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterUsers() {
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+      const status = document.getElementById('filter-status').value;
+      
+      let filtered = allUsers;
+      
+      if (status) {
+        filtered = filtered.filter(user => user.status === status);
+      }
+      
+      if (searchTerm) {
+        filtered = filtered.filter(user => 
+          user.name.toLowerCase().includes(searchTerm) ||
+          user.email.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      renderUsers(filtered);
+    }
+
+    function openModal(mode, userId = null) {
+      const modal = document.getElementById('user-modal');
+      const title = document.getElementById('modal-title');
+      const form = document.getElementById('user-form');
+      const passwordGroup = document.getElementById('password-group');
+      const passwordInput = document.getElementById('user-password');
+      const passwordHelp = document.getElementById('password-help');
+      
+      form.reset();
+      document.getElementById('user-id').value = '';
+
+      if (mode === 'create') {
+        title.textContent = 'Nuevo Usuario';
+        passwordInput.required = true;
+        passwordHelp.textContent = 'Mínimo 6 caracteres';
+      } else {
+        title.textContent = 'Editar Usuario';
+        passwordInput.required = false;
+        passwordHelp.textContent = 'Dejar vacío para mantener la contraseña actual';
+        
+        const user = allUsers.find(u => u._id === userId);
+        if (user) {
+          document.getElementById('user-id').value = user._id;
+          document.getElementById('user-name-input').value = user.name;
+          document.getElementById('user-email-input').value = user.email;
+          document.getElementById('user-status').value = user.status || 'active';
+        }
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('user-modal').classList.remove('active');
+    }
+
+    async function saveUser() {
+      const id = document.getElementById('user-id').value;
+      const name = document.getElementById('user-name-input').value;
+      const email = document.getElementById('user-email-input').value;
+      const password = document.getElementById('user-password').value;
+      const status = document.getElementById('user-status').value;
+
+      if (!name || !email) {
+        showToast('Nombre y email son obligatorios', 'error');
+        return;
+      }
+
+      if (!id && !password) {
+        showToast('La contraseña es obligatoria para nuevos usuarios', 'error');
+        return;
+      }
+
+      if (password && password.length < 6) {
+        showToast('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+      }
+
+      const data = { name, email, status };
+      if (password) {
+        data.password = password;
+      }
+      
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true;
+
+      try {
+        let response;
+        if (id) {
+          response = await apiRequest(`/api/v1/users/${id}`, 'PATCH', data);
+        } else {
+          response = await apiRequest('/api/v1/users', 'POST', data);
+        }
+
+        if (response.success) {
+          showToast(id ? 'Usuario actualizado' : 'Usuario creado', 'success');
+          closeModal();
+          loadUsers();
+        } else {
+          showToast(response.message || 'Error al guardar', 'error');
+        }
+      } catch (error) {
+        showToast('Error al guardar usuario', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function openDeleteModal(userId) {
+      document.getElementById('delete-user-id').value = userId;
+      document.getElementById('delete-modal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').classList.remove('active');
+    }
+
+    async function confirmDelete() {
+      const id = document.getElementById('delete-user-id').value;
+      
+      try {
+        const response = await apiRequest(`/api/v1/users/${id}`, 'DELETE');
+        if (response.success) {
+          showToast('Usuario eliminado', 'success');
+          closeDeleteModal();
+          loadUsers();
+        } else {
+          showToast('Error al eliminar', 'error');
+        }
+      } catch (error) {
+        showToast('Error al eliminar usuario', 'error');
+      }
+    }
+
+    function getInitials(name) {
+      if (!name) return 'U';
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      return new Date(dateString).toLocaleDateString('es-MX', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
