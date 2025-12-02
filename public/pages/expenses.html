@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gastos - Gestor de Gastos Grupales</title>
+  <link rel="stylesheet" href="/css/styles.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="app-layout">
+
+    <aside class="sidebar" id="sidebar" aria-label="Menú lateral">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span>$</span> SplitWise
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Principal</div>
+          <a href="/pages/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i> Dashboard
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Gestión</div>
+          <a href="/pages/groups.html" class="nav-link">
+            <i class="fas fa-users"></i> Grupos
+          </a>
+
+          <a href="/pages/expenses.html" class="nav-link active">
+            <i class="fas fa-receipt"></i> Gastos
+          </a>
+
+          <a href="/pages/budgets.html" class="nav-link">
+            <i class="fas fa-piggy-bank"></i> Presupuestos
+          </a>
+
+          <a href="/pages/payments.html" class="nav-link">
+            <i class="fas fa-money-bill-wave"></i> Pagos
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Administración</div>
+          <a href="/pages/users.html" class="nav-link">
+            <i class="fas fa-user-cog"></i> Usuarios
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <div class="user-details">
+            <div class="user-name" id="user-name">Usuario</div>
+            <div class="user-email" id="user-email">email@example.com</div>
+          </div>
+          <button class="btn btn-ghost btn-icon" onclick="logout()" title="Cerrar sesión">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <div class="header-left">
+          <button class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">Gastos</h1>
+        </div>
+
+        <div class="header-right">
+          <button class="btn btn-primary" onclick="openModal('create')">
+            <i class="fas fa-plus"></i> Nuevo Gasto
+          </button>
+        </div>
+      </header>
+
+      <div class="main-container">
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon success"><i class="fas fa-dollar-sign"></i></div>
+            <div class="stat-content">
+              <h3 id="total-amount">$0</h3>
+              <p>Total de gastos</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon warning"><i class="fas fa-calendar"></i></div>
+            <div class="stat-content">
+              <h3 id="month-amount">$0</h3>
+              <p>Este mes</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon info"><i class="fas fa-receipt"></i></div>
+            <div class="stat-content">
+              <h3 id="expense-count">0</h3>
+              <p>Registros</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <h3 class="table-title">Todos los Gastos</h3>
+
+            <div class="table-actions">
+              <select id="filter-group" class="form-select" onchange="filterExpenses()">
+                <option value="">Todos los grupos</option>
+              </select>
+
+              <input id="search-input" type="text" placeholder="Buscar..." class="form-input" />
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Monto</th>
+                  <th>Grupo</th>
+                  <th>Fecha</th>
+                  <th>Etiquetas</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="expenses-table">
+                <tr>
+                  <td colspan="6" class="text-center">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="expense-modal">
+    <div class="modal modal-animated">
+      <div class="modal-header">
+        <h3 id="modal-title">Nuevo Gasto</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="expense-form">
+          <input type="hidden" id="expense-id">
+
+          <div class="form-group">
+            <label>Descripción *</label>
+            <input id="expense-description" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label>Monto *</label>
+            <input id="expense-amount" type="number" class="form-input" step="0.01" min="0" required>
+          </div>
+
+          <div class="form-group">
+            <label>Grupo *</label>
+            <select id="expense-group" class="form-select" required></select>
+          </div>
+
+          <div class="form-group">
+            <label>Fecha</label>
+            <input id="expense-date" type="date" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label>Etiquetas</label>
+            <input id="expense-tags" class="form-input" placeholder="comida, viaje..." />
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" id="save-btn" onclick="saveExpense()">
+          <i class="fas fa-save"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal modal-animated">
+      <div class="modal-header">
+        <h3>Confirmar eliminación</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p>¿Deseas eliminar este gasto?</p>
+        <input type="hidden" id="delete-expense-id">
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancelar</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">
+          <i class="fas fa-trash"></i> Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+
+    const debounce = (fn, delay = 300) => {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+      };
+    };
+
+    const getUser = () => JSON.parse(localStorage.getItem("user") || "{}");
+
+    const parseTags = (str) =>
+      str.split(",").map(t => t.trim()).filter(Boolean);
+
+    let allExpenses = [];
+    let allGroups = [];
+
+    checkAuth();
+    loadUserInfo();
+    loadData();
+
+    async function loadData() {
+      await loadGroups();
+      await loadExpenses();
+    }
+
+    async function loadGroups() {
+      try {
+        const res = await apiRequest("/api/v1/groups");
+        if (res?.success) {
+          allGroups = res.data;
+          populateGroupSelects();
+        }
+      } catch (e) {
+        console.error("Error loading groups:", e);
+      }
+    }
+
+    function populateGroupSelects() {
+      const filter = document.getElementById("filter-group");
+      const form = document.getElementById("expense-group");
+
+      const opts = allGroups
+        .map(g => `<option value="${g._id}">${g.name}</option>`)
+        .join("");
+
+      filter.innerHTML = `<option value="">Todos los grupos</option>` + opts;
+      form.innerHTML = `<option value="">Seleccionar grupo</option>` + opts;
+    }
+
+    async function loadExpenses() {
+      try {
+        const res = await apiRequest("/api/v1/expenses");
+        if (res?.success) {
+          allExpenses = res.data;
+          renderExpenses(allExpenses);
+          updateStats();
+        }
+      } catch (e) {
+        showToast("Error al cargar gastos", "error");
+      }
+    }
+
+    function renderExpenses(expenses) {
+      const tbody = document.getElementById("expenses-table");
+
+      if (!expenses.length) {
+        tbody.innerHTML = `
+          <tr><td colspan="6">
+            <div class="empty-state">
+              <i class="fas fa-receipt"></i>
+              <h3>No hay gastos</h3>
+              <button class="btn btn-primary mt-2" onclick="openModal('create')">
+                <i class="fas fa-plus"></i> Nuevo Gasto
+              </button>
+            </div>
+          </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = expenses.map(exp => {
+        const group = allGroups.find(g => g._id === exp.groupId);
+        const tags = (exp.tags || []).slice(0, 2)
+          .map(t => `<span class="tag">${t}</span>`).join("");
+
+        return `
+        <tr>
+          <td><strong>${exp.description}</strong></td>
+          <td><span class="badge badge-success">${formatCurrency(exp.amount)}</span></td>
+          <td>${group?.name || "-"}</td>
+          <td>${formatDate(exp.date)}</td>
+          <td>
+            <div class="tags-container">
+              ${tags}
+              ${(exp.tags?.length > 2) ? `<span class="tag">+${exp.tags.length-2}</span>` : ""}
+            </div>
+          </td>
+          <td>
+            <button class="btn-sm btn-ghost" onclick="openModal('edit','${exp._id}')">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn-sm btn-ghost" onclick="openDeleteModal('${exp._id}')">
+              <i class="fas fa-trash" style="color:var(--danger-color)"></i>
+            </button>
+          </td>
+        </tr>`;
+      }).join("");
+    }
+
+    function updateStats() {
+      const total = allExpenses.reduce((sum, e) => sum + e.amount, 0);
+      document.getElementById("total-amount").textContent = formatCurrency(total);
+
+      document.getElementById("expense-count").textContent = allExpenses.length;
+
+      const now = new Date();
+      const monthExpenses = allExpenses.filter(e => {
+        const d = new Date(e.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+
+      const monthTotal = monthExpenses.reduce((s, e) => s + e.amount, 0);
+      document.getElementById("month-amount").textContent = formatCurrency(monthTotal);
+    }
+
+    /* -------------------
+       FILTER
+    --------------------*/
+
+    const filterExpenses = debounce(() => {
+      const search = document.getElementById("search-input").value.toLowerCase();
+      const groupId = document.getElementById("filter-group").value;
+
+      let filtered = [...allExpenses];
+
+      if (groupId)
+        filtered = filtered.filter(e => e.groupId === groupId);
+
+      if (search)
+        filtered = filtered.filter(e =>
+          e.description.toLowerCase().includes(search) ||
+          (e.tags || []).some(t => t.toLowerCase().includes(search))
+        );
+
+      renderExpenses(filtered);
+    });
+
+    function openModal(mode, id = null) {
+      const modal = document.getElementById("expense-modal");
+      const title = document.getElementById("modal-title");
+      const form = document.getElementById("expense-form");
+
+      form.reset();
+      document.getElementById("expense-date").value = new Date().toISOString().split("T")[0];
+
+      if (mode === "create") {
+        title.textContent = "Nuevo Gasto";
+      } else {
+        title.textContent = "Editar Gasto";
+        const exp = allExpenses.find(e => e._id === id);
+        if (exp) {
+          document.getElementById("expense-id").value = exp._id;
+          document.getElementById("expense-description").value = exp.description;
+          document.getElementById("expense-amount").value = exp.amount;
+          document.getElementById("expense-group").value = exp.groupId;
+          document.getElementById("expense-date").value = exp.date?.split("T")[0];
+          document.getElementById("expense-tags").value = exp.tags.join(", ");
+        }
+      }
+
+      modal.classList.add("active");
+    }
+
+    function closeModal() {
+      document.getElementById("expense-modal").classList.remove("active");
+    }
+
+    async function saveExpense() {
+      const id = document.getElementById("expense-id").value;
+
+      const data = {
+        description: document.getElementById("expense-description").value,
+        amount: parseFloat(document.getElementById("expense-amount").value),
+        groupId: document.getElementById("expense-group").value,
+        date: document.getElementById("expense-date").value,
+        tags: parseTags(document.getElementById("expense-tags").value),
+        userId: getUser().id
+      };
+
+      if (!data.description || !data.amount || !data.groupId) {
+        showToast("Completa todos los campos obligatorios", "error");
+        return;
+      }
+
+      const btn = document.getElementById("save-btn");
+      btn.disabled = true;
+
+      try {
+        const url = id ? `/api/v1/expenses/${id}` : "/api/v1/expenses";
+        const method = id ? "PATCH" : "POST";
+
+        const res = await apiRequest(url, method, data);
+        if (res?.success) {
+          showToast(id ? "Gasto actualizado" : "Gasto registrado", "success");
+          closeModal();
+          loadExpenses();
+        }
+      } catch {
+        showToast("Error al guardar", "error");
+      }
+
+      btn.disabled = false;
+    }
+
+    /* -------------------
+        DELETE
+    --------------------*/
+
+    function openDeleteModal(id) {
+      document.getElementById("delete-expense-id").value = id;
+      document.getElementById("delete-modal").classList.add("active");
+    }
+
+    function closeDeleteModal() {
+      document.getElementById("delete-modal").classList.remove("active");
+    }
+
+    async function confirmDelete() {
+      const id = document.getElementById("delete-expense-id").value;
+      const res = await apiRequest(`/api/v1/expenses/${id}`, "DELETE");
+
+      if (res?.success) {
+        showToast("Gasto eliminado", "success");
+        closeDeleteModal();
+        loadExpenses();
+      } else {
+        showToast("Error al eliminar", "error");
+      }
+    }
+
+    function formatCurrency(n) {
+      return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(n);
+    }
+
+    function formatDate(date) {
+      if (!date) return "-";
+      return new Date(date).toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
+    }
+
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("open");
+    }
+  </script>
+</body>
+</html>
