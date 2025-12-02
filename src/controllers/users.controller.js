@@ -1,7 +1,7 @@
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 const SALT_ROUNDS = 10;
 
-module.exports = function buildUsersController({ userRepo }) {
+export default function buildUsersController({ userRepo }) {
   if (!userRepo) throw new Error("userRepo es requerido en users.controller");
 
   return {
@@ -75,7 +75,7 @@ module.exports = function buildUsersController({ userRepo }) {
         delete updateFields.deletedAt;
 
         if (updateFields.password) {
-          updateFields.password = await bcrypt.hash(updateFields.password, 10); // ✅
+          updateFields.password = await bcrypt.hash(updateFields.password, 10);
         }
 
         const ok = await userRepo.update(id, updateFields);
@@ -107,4 +107,4 @@ module.exports = function buildUsersController({ userRepo }) {
       }
     },
   };
-};
+}

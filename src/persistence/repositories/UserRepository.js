@@ -1,5 +1,5 @@
-const { ObjectId } = require("mongodb");
-const BaseRepository = require("./BaseRepository");
+import { ObjectId } from "mongodb";
+import BaseRepository from "./BaseRepository.js";
 
 class UserRepository extends BaseRepository {
   constructor(db) {
@@ -53,4 +53,4 @@ class UserRepository extends BaseRepository {
   }
 }
 
-module.exports = UserRepository;
+export default UserRepository;

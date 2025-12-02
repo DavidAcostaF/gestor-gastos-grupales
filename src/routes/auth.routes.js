@@ -1,8 +1,8 @@
-const { Router } = require("express");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+import { Router } from "express";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
-module.exports = function buildAuthRouter({ userRepo }) {
+export default function buildAuthRouter({ userRepo }) {
   if (!userRepo) throw new Error("userRepo es requerido en auth.routes");
 
   const router = Router();
@@ -45,4 +45,4 @@ module.exports = function buildAuthRouter({ userRepo }) {
   });
 
   return router;
-};
+}

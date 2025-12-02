@@ -1,7 +1,7 @@
-const { Router } = require("express");
-const buildUsersController = require("../controllers/users.controller");
+import { Router } from "express";
+import buildUsersController from "../controllers/users.controller.js";
 
-module.exports = function buildUsersRouter({ userRepo, verifyToken }) {
+export default function buildUsersRouter({ userRepo, verifyToken }) {
   if (!userRepo) throw new Error("userRepo es requerido en users.routes");
 
   const router = Router();
@@ -18,4 +18,4 @@ module.exports = function buildUsersRouter({ userRepo, verifyToken }) {
   router.delete("/:id", controller.deleteUser);
 
   return router;
-};
+}
