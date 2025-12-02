@@ -1,11 +1,9 @@
-const { ObjectId } = require("mongodb");
-const BaseRepository = require("./BaseRepository");
+import { ObjectId } from "mongodb";
+import BaseRepository from "./BaseRepository.js";
 
-class GroupRepository extends BaseRepository{
-
+class GroupRepository extends BaseRepository {
   constructor(db) {
     super("groups", db);
-
   }
 
   async create(groupObj) {
@@ -47,4 +45,4 @@ class GroupRepository extends BaseRepository{
   }
 }
 
-module.exports = GroupRepository;
+export default GroupRepository;

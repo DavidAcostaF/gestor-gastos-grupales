@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grupos - Gestor de Gastos Grupales</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .participants-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+    }
+    .participant-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+    }
+    .participant-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .participant-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .participant-role {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    .add-participant-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .add-participant-form .form-select {
+      flex: 1;
+    }
+    .member-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+    .member-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      background: var(--primary-light);
+      color: var(--primary-color);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    /* Estilos para el modal de balances */
+    .balances-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .balance-card {
+      padding: 1rem;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      text-align: center;
+    }
+    .balance-card-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    .balance-card-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+    .balance-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .balance-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+    }
+    .balance-user {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .balance-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+    .balance-amount {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .balance-positive {
+      color: var(--success-color);
+    }
+    .balance-negative {
+      color: var(--danger-color);
+    }
+    .balance-neutral {
+      color: var(--text-secondary);
+    }
+    .settlements-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+    .settlements-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .settlement-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+    }
+    .settlement-arrow {
+      color: var(--primary-color);
+      font-size: 1.2rem;
+    }
+    .settlement-amount {
+      margin-left: auto;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span>$</span> SplitWise
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Principal</div>
+          <a href="/pages/dashboard.html" class="nav-link">
+            <i class="fas fa-home"></i>
+            Dashboard
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Gestión</div>
+          <a href="/pages/groups.html" class="nav-link active">
+            <i class="fas fa-users"></i>
+            Grupos
+          </a>
+          <a href="/pages/expenses.html" class="nav-link">
+            <i class="fas fa-receipt"></i>
+            Gastos
+          </a>
+          <a href="/pages/budgets.html" class="nav-link">
+            <i class="fas fa-piggy-bank"></i>
+            Presupuestos
+          </a>
+          <a href="/pages/payments.html" class="nav-link">
+            <i class="fas fa-money-bill-wave"></i>
+            Pagos
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Administración</div>
+          <a href="/pages/users.html" class="nav-link">
+            <i class="fas fa-user-cog"></i>
+            Usuarios
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <div class="user-details">
+            <div class="user-name" id="user-name">Usuario</div>
+            <div class="user-email" id="user-email">email@example.com</div>
+          </div>
+          <button class="btn btn-ghost btn-icon" onclick="logout()" title="Cerrar sesión">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="main-header">
+        <div class="header-left">
+          <button class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">Grupos</h1>
+        </div>
+        <div class="header-right">
+          <button class="btn btn-primary" onclick="openModal('create')">
+            <i class="fas fa-users-plus"></i>
+            Nuevo Grupo
+          </button>
+        </div>
+      </header>
+
+      <div class="main-container">
+        <!-- Groups Table -->
+        <div class="table-container">
+          <div class="table-header">
+            <h3 class="table-title">Todos los Grupos</h3>
+            <div class="table-actions">
+              <input type="text" class="form-input" placeholder="Buscar..." id="search-input" style="width: 200px;" onkeyup="filterGroups()">
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Grupo</th>
+                  <th>Descripción</th>
+                  <th>Participantes</th>
+                  <th>Creado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="groups-table">
+                <tr>
+                  <td colspan="5" class="text-center">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Create/Edit Group -->
+  <div class="modal-overlay" id="group-modal">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Nuevo Grupo</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="group-form">
+          <input type="hidden" id="group-id">
+          
+          <div class="form-group">
+            <label for="group-name-input" class="form-label">Nombre del grupo *</label>
+            <input type="text" id="group-name-input" class="form-input" placeholder="Viaje a la playa" required>
+          </div>
+
+          <div class="form-group">
+            <label for="group-description-input" class="form-label">Descripción</label>
+            <textarea id="group-description-input" class="form-textarea" placeholder="Descripción del grupo..."></textarea>
+          </div>
+
+          <div class="form-group" id="participants-section" style="display: none;">
+            <label class="form-label">Participantes</label>
+            <div class="participants-list" id="participants-list"></div>
+            <div class="add-participant-form">
+              <select id="add-participant-select" class="form-select">
+                <option value="">Seleccionar usuario...</option>
+              </select>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="addParticipant()">
+                <i class="fas fa-plus"></i> Agregar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveGroup()" id="save-btn">
+          <i class="fas fa-save"></i>
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Confirm Delete -->
+  <div class="modal-overlay" id="delete-modal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirmar eliminación</h3>
+        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar este grupo? Esta acción no se puede deshacer.</p>
+        <input type="hidden" id="delete-group-id">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancelar</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">
+          <i class="fas fa-trash"></i>
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ver Participantes -->
+  <div class="modal-overlay" id="view-participants-modal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Participantes del Grupo</h3>
+        <button class="modal-close" onclick="closeViewParticipantsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="participants-list" id="view-participants-list"></div>
+        <div class="add-participant-form">
+          <select id="view-add-participant-select" class="form-select">
+            <option value="">Seleccionar usuario...</option>
+          </select>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addParticipantFromView()">
+            <i class="fas fa-plus"></i> Agregar
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeViewParticipantsModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Calcular Deudas / Balances -->
+  <div class="modal-overlay" id="balances-modal">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Balances y Deudas</h3>
+        <button class="modal-close" onclick="closeBalancesModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="balances-modal-body">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeBalancesModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    let allGroups = [];
+    let allUsers = [];
+    let currentGroupId = null;
+
+    // Verificar autenticación
+    checkAuth();
+    loadUserInfo();
+    loadData();
+
+    async function loadData() {
+      await loadUsers();
+      await loadGroups();
+    }
+
+    async function loadUsers() {
+      try {
+        const response = await apiRequest('/api/v1/users');
+        if (response.success) {
+          allUsers = response.data;
+        }
+      } catch (error) {
+        showToast('Error al cargar usuarios', 'error');
+      }
+    }
+
+    async function loadGroups() {
+      try {
+        const response = await apiRequest('/api/v1/groups');
+        if (response.success) {
+          allGroups = response.data;
+          renderGroups(allGroups);
+        }
+      } catch (error) {
+        showToast('Error al cargar grupos', 'error');
+      }
+    }
+
+    function getUserById(userId) {
+      return allUsers.find(u => u._id === userId || u._id === userId?.toString());
+    }
+
+    function renderGroups(groups) {
+      const tbody = document.getElementById('groups-table');
+      
+      if (groups.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <h3>No hay grupos</h3>
+                <p>Crea el primer grupo para comenzar</p>
+                <button class="btn btn-primary mt-2" onclick="openModal('create')">
+                  <i class="fas fa-users-plus"></i> Nuevo Grupo
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = groups.map(group => `
+        <tr>
+          <td><strong>${group.name}</strong></td>
+          <td>${group.description || '-'}</td>
+          <td>
+            <div class="member-badges">
+              ${(group.participants || []).slice(0, 3).map(p => {
+                const user = getUserById(p.userId);
+                return `<span class="member-badge" title="${user?.name || 'Usuario'}">${getInitials(user?.name || 'U')}</span>`;
+              }).join('')}
+              ${group.participants && group.participants.length > 3 ? `<span class="member-badge">+${group.participants.length - 3}</span>` : ''}
+            </div>
+          </td>
+          <td>${formatDate(group.createdAt)}</td>
+          <td>
+            <div class="flex" style="gap: 0.5rem;">
+              <button class="btn btn-sm btn-ghost" onclick="openViewParticipants('${group._id}')" title="Ver participantes">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn btn-sm btn-ghost" onclick="openBalancesModal('${group._id}')" title="Ver balances">
+                <i class="fas fa-calculator"></i>
+              </button>
+              <button class="btn btn-sm btn-ghost" onclick="openModal('edit', '${group._id}')" title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-ghost" onclick="openDeleteModal('${group._id}')" title="Eliminar">
+                <i class="fas fa-trash" style="color: var(--danger-color);"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterGroups() {
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+      const filtered = allGroups.filter(group => 
+        group.name.toLowerCase().includes(searchTerm) ||
+        (group.description && group.description.toLowerCase().includes(searchTerm))
+      );
+      renderGroups(filtered);
+    }
+
+    function populateUserSelect(selectId, excludeUserIds = []) {
+      const select = document.getElementById(selectId);
+      const availableUsers = allUsers.filter(u => !excludeUserIds.includes(u._id));
+      
+      select.innerHTML = '<option value="">Seleccionar usuario...</option>' + 
+        availableUsers.map(u => `<option value="${u._id}">${u.name} (${u.email})</option>`).join('');
+    }
+
+    function openModal(mode, groupId = null) {
+      const modal = document.getElementById('group-modal');
+      const title = document.getElementById('modal-title');
+      const form = document.getElementById('group-form');
+      const participantsSection = document.getElementById('participants-section');
+      
+      form.reset();
+      document.getElementById('group-id').value = '';
+      currentGroupId = groupId;
+
+      if (mode === 'create') {
+        title.textContent = 'Nuevo Grupo';
+        participantsSection.style.display = 'none';
+      } else {
+        title.textContent = 'Editar Grupo';
+        participantsSection.style.display = 'block';
+        
+        const group = allGroups.find(g => g._id === groupId);
+        if (group) {
+          document.getElementById('group-id').value = group._id;
+          document.getElementById('group-name-input').value = group.name;
+          document.getElementById('group-description-input').value = group.description || '';
+          renderParticipantsList(group);
+          const participantIds = (group.participants || []).map(p => p.userId?.toString());
+          populateUserSelect('add-participant-select', participantIds);
+        }
+      }
+
+      modal.classList.add('active');
+    }
+
+    function renderParticipantsList(group) {
+      const list = document.getElementById('participants-list');
+      const participants = group.participants || [];
+      
+      list.innerHTML = participants.map(p => {
+        const user = getUserById(p.userId);
+        return `
+          <div class="participant-item">
+            <div class="participant-info">
+              <div class="participant-avatar">${getInitials(user?.name || 'U')}</div>
+              <div>
+                <div><strong>${user?.name || 'Usuario'}</strong></div>
+                <div class="participant-role">${p.role}</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-ghost" onclick="removeParticipant('${group._id}', '${p.userId}')">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function addParticipant() {
+      const userId = document.getElementById('add-participant-select').value;
+      if (!userId || !currentGroupId) return;
+
+      try {
+        const response = await apiRequest(`/api/v1/groups/${currentGroupId}/participants`, 'POST', { userId, role: 'member' });
+        if (response.success) {
+          showToast('Participante agregado', 'success');
+          const group = allGroups.find(g => g._id === currentGroupId);
+          if (group) {
+            renderParticipantsList(response.data);
+            const participantIds = (response.data.participants || []).map(p => p.userId?.toString());
+            populateUserSelect('add-participant-select', participantIds);
+          }
+        }
+      } catch (error) {
+        showToast('Error al agregar participante', 'error');
+      }
+    }
+
+    async function removeParticipant(groupId, userId) {
+      try {
+        const response = await apiRequest(`/api/v1/groups/${groupId}/participants/${userId}`, 'DELETE');
+        if (response.success) {
+          showToast('Participante eliminado', 'success');
+          const group = allGroups.find(g => g._id === groupId);
+          if (group && groupId === currentGroupId) {
+            renderParticipantsList(response.data);
+            const participantIds = (response.data.participants || []).map(p => p.userId?.toString());
+            populateUserSelect('add-participant-select', participantIds);
+          }
+        }
+      } catch (error) {
+        showToast('Error al eliminar participante', 'error');
+      }
+    }
+
+    function openViewParticipants(groupId) {
+      const modal = document.getElementById('view-participants-modal');
+      const group = allGroups.find(g => g._id === groupId);
+      
+      if (group) {
+        renderViewParticipantsList(group);
+        const participantIds = (group.participants || []).map(p => p.userId?.toString());
+        populateUserSelect('view-add-participant-select', participantIds);
+        currentGroupId = groupId;
+        modal.classList.add('active');
+      }
+    }
+
+    function renderViewParticipantsList(group) {
+      const list = document.getElementById('view-participants-list');
+      const participants = group.participants || [];
+      
+      list.innerHTML = participants.map(p => {
+        const user = getUserById(p.userId);
+        return `
+          <div class="participant-item">
+            <div class="participant-info">
+              <div class="participant-avatar">${getInitials(user?.name || 'U')}</div>
+              <div>
+                <div><strong>${user?.name || 'Usuario'}</strong></div>
+                <div class="participant-role">${p.role}</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-ghost" onclick="removeParticipant('${group._id}', '${p.userId}')">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function addParticipantFromView() {
+      const userId = document.getElementById('view-add-participant-select').value;
+      if (!userId || !currentGroupId) return;
+
+      try {
+        const response = await apiRequest(`/api/v1/groups/${currentGroupId}/participants`, 'POST', { userId, role: 'member' });
+        if (response.success) {
+          showToast('Participante agregado', 'success');
+          renderViewParticipantsList(response.data);
+          const participantIds = (response.data.participants || []).map(p => p.userId?.toString());
+          populateUserSelect('view-add-participant-select', participantIds);
+          const groupIndex = allGroups.findIndex(g => g._id === currentGroupId);
+          if (groupIndex !== -1) {
+            allGroups[groupIndex] = response.data;
+            renderGroups(allGroups);
+          }
+        }
+      } catch (error) {
+        showToast('Error al agregar participante', 'error');
+      }
+    }
+
+    function closeViewParticipantsModal() {
+      document.getElementById('view-participants-modal').classList.remove('active');
+    }
+
+    function closeModal() {
+      document.getElementById('group-modal').classList.remove('active');
+    }
+
+    async function saveGroup() {
+      const id = document.getElementById('group-id').value;
+      const name = document.getElementById('group-name-input').value;
+      const description = document.getElementById('group-description-input').value;
+
+      if (!name) {
+        showToast('El nombre es obligatorio', 'error');
+        return;
+      }
+
+      const data = { name, description };
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true;
+
+      try {
+        let response;
+        if (id) {
+          response = await apiRequest(`/api/v1/groups/${id}`, 'PATCH', data);
+        } else {
+          response = await apiRequest('/api/v1/groups', 'POST', data);
+        }
+
+        if (response.success) {
+          showToast(id ? 'Grupo actualizado' : 'Grupo creado', 'success');
+          closeModal();
+          loadGroups();
+        }
+      } catch (error) {
+        showToast('Error al guardar grupo', 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function openDeleteModal(groupId) {
+      document.getElementById('delete-group-id').value = groupId;
+      document.getElementById('delete-modal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').classList.remove('active');
+    }
+
+    async function confirmDelete() {
+      const id = document.getElementById('delete-group-id').value;
+      
+      try {
+        const response = await apiRequest(`/api/v1/groups/${id}`, 'DELETE');
+        if (response.success || response.status === 204) {
+          showToast('Grupo eliminado', 'success');
+          closeDeleteModal();
+          loadGroups();
+        }
+      } catch (error) {
+        showToast('Error al eliminar grupo', 'error');
+      }
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      return new Date(dateString).toLocaleDateString('es-MX', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    async function openBalancesModal(groupId) {
+      try {
+        const response = await apiRequest(`/api/v1/groups/${groupId}/balances`);
+        if (response.success) {
+          renderBalances(response.data);
+          document.getElementById('balances-modal').classList.add('active');
+        }
+      } catch (error) {
+        showToast('Error al calcular balances', 'error');
+      }
+    }
+
+    function renderBalances(data) {
+      const body = document.getElementById('balances-modal-body');
+      
+      let html = `
+        <div class="balances-summary">
+          <div class="balance-card">
+            <div class="balance-card-value">${formatMoney(data.data.totalExpenses)}</div>
+            <div class="balance-card-label">Total de gastos</div>
+          </div>
+          <div class="balance-card">
+            <div class="balance-card-value">${formatMoney(data.data.totalPayments)}</div>
+            <div class="balance-card-label">Total de pagos</div>
+          </div>
+        </div>
+        
+        <h4 style="margin-bottom: 1rem; font-weight: 600;">Balances por usuario</h4>
+        <div class="balance-list">
+      `;
+
+      (data.data.balances || []).forEach(balance => {
+        const user = data.data.usersInfo?.[balance.userId] || { name: 'Usuario', email: '' };
+        const amountClass = balance.balance > 0 ? 'balance-positive' : balance.balance < 0 ? 'balance-negative' : 'balance-neutral';
+        
+        html += `
+          <div class="balance-item">
+            <div class="balance-user">
+              <div class="balance-avatar">${getInitials(user.name)}</div>
+              <div>
+                <div><strong>${user.name}</strong></div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">${user.email}</div>
+              </div>
+            </div>
+            <div class="balance-amount ${amountClass}">
+              ${balance.balance > 0 ? '+' : ''}${formatMoney(balance.balance)}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div>`;
+
+      if (data.data.settlements && data.data.settlements.length > 0) {
+        html += `
+          <div class="settlements-section">
+            <h4 class="settlements-title">
+              <i class="fas fa-exchange-alt"></i>
+              Sugerencias de pago
+            </h4>
+        `;
+
+        data.data.settlements.forEach(settlement => {
+          const fromUser = data.data.usersInfo?.[settlement.from] || { name: 'Usuario' };
+          const toUser = data.data.usersInfo?.[settlement.to] || { name: 'Usuario' };
+          
+          html += `
+            <div class="settlement-item">
+              <div style="font-weight: 500;">${fromUser.name}</div>
+              <i class="settlement-arrow fas fa-arrow-right"></i>
+              <div style="font-weight: 500;">${toUser.name}</div>
+              <div class="settlement-amount">${formatMoney(settlement.amount)}</div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+      }
+
+      body.innerHTML = html;
+    }
+
+    function closeBalancesModal() {
+      document.getElementById('balances-modal').classList.remove('active');
+    }
+
+    function getInitials(name) {
+      if (!name) return 'U';
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function formatMoney(amount) {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN'
+      }).format(amount || 0);
+    }
+  </script>
+</body>
+</html>
