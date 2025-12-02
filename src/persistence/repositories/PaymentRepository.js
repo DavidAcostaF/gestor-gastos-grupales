@@ -1,5 +1,5 @@
-const { ObjectId } = require("mongodb");
-const BaseRepository = require("./BaseRepository");
+import { ObjectId } from "mongodb";
+import BaseRepository from "./BaseRepository.js";
 
 class PaymentRepository extends BaseRepository {
   constructor(db) {
@@ -24,7 +24,9 @@ class PaymentRepository extends BaseRepository {
   }
 
   async getAll(filter = {}) {
-    return this.getCollection().find({ deletedAt: null, ...filter }).toArray();
+    return this.getCollection()
+      .find({ deletedAt: null, ...filter })
+      .toArray();
   }
 
   async update(id, updateFields) {
@@ -47,4 +49,4 @@ class PaymentRepository extends BaseRepository {
   }
 }
 
-module.exports = PaymentRepository;
+export default PaymentRepository;
