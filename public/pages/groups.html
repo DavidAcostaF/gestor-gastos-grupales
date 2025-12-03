@@ -103,8 +103,9 @@
       align-items: center;
       justify-content: space-between;
       padding: 0.75rem 1rem;
-      background: var(--bg-secondary);
-      border-radius: 10px;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
     }
     .balance-user {
       display: flex;
@@ -112,18 +113,19 @@
       gap: 0.75rem;
     }
     .balance-avatar {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      background: var(--primary-gradient);
-      color: white;
+      background: var(--primary-light);
+      color: var(--primary-color);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 600;
+      font-size: 0.85rem;
     }
     .balance-amount {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
     }
     .balance-positive {
@@ -141,30 +143,32 @@
       border-top: 1px solid var(--border-color);
     }
     .settlements-title {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      color: var(--text-primary);
     }
     .settlement-item {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       padding: 0.75rem 1rem;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-      border-radius: 10px;
+      background: var(--accent-light);
+      border-radius: 8px;
       margin-bottom: 0.5rem;
+      border: 1px solid var(--border-color);
     }
     .settlement-arrow {
-      color: var(--primary-color);
-      font-size: 1.2rem;
+      color: var(--accent-color);
+      font-size: 1rem;
     }
     .settlement-amount {
       margin-left: auto;
-      font-weight: 700;
-      color: var(--primary-color);
+      font-weight: 600;
+      color: var(--accent-color);
     }
   </style>
 </head>
@@ -295,7 +299,7 @@
             <textarea id="group-description-input" class="form-textarea" placeholder="Descripción del grupo..."></textarea>
           </div>
 
-          <div class="form-group" id="participants-section" style="display: none;">
+          <div class="form-group" id="participants-section">
             <label class="form-label">Participantes</label>
             <div class="participants-list" id="participants-list"></div>
             <div class="add-participant-form">
@@ -462,9 +466,6 @@
           <td>${formatDate(group.createdAt)}</td>
           <td>
             <div class="flex" style="gap: 0.5rem;">
-              <button class="btn btn-sm btn-ghost" onclick="openViewParticipants('${group._id}')" title="Ver participantes">
-                <i class="fas fa-eye"></i>
-              </button>
               <button class="btn btn-sm btn-ghost" onclick="openBalancesModal('${group._id}')" title="Ver balances">
                 <i class="fas fa-calculator"></i>
               </button>
@@ -497,35 +498,93 @@
         availableUsers.map(u => `<option value="${u._id}">${u.name} (${u.email})</option>`).join('');
     }
 
+    // Variable para almacenar participantes temporales al crear grupo
+    let tempParticipants = [];
+
     function openModal(mode, groupId = null) {
       const modal = document.getElementById('group-modal');
       const title = document.getElementById('modal-title');
       const form = document.getElementById('group-form');
-      const participantsSection = document.getElementById('participants-section');
       
       form.reset();
       document.getElementById('group-id').value = '';
       currentGroupId = groupId;
+      tempParticipants = [];
 
       if (mode === 'create') {
         title.textContent = 'Nuevo Grupo';
-        participantsSection.style.display = 'none';
+        document.getElementById('participants-list').innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">Aún no hay participantes</p>';
+        populateUserSelect('add-participant-select', []);
       } else {
         title.textContent = 'Editar Grupo';
-        participantsSection.style.display = 'block';
         
         const group = allGroups.find(g => g._id === groupId);
         if (group) {
           document.getElementById('group-id').value = group._id;
           document.getElementById('group-name-input').value = group.name;
           document.getElementById('group-description-input').value = group.description || '';
-          renderParticipantsList(group);
-          const participantIds = (group.participants || []).map(p => p.userId?.toString());
+          tempParticipants = (group.participants || []).map(p => ({ userId: p.userId, role: p.role || 'member' }));
+          renderTempParticipantsList();
+          const participantIds = tempParticipants.map(p => p.userId?.toString());
           populateUserSelect('add-participant-select', participantIds);
         }
       }
 
       modal.classList.add('active');
+    }
+
+    function renderTempParticipantsList() {
+      const list = document.getElementById('participants-list');
+      
+      if (tempParticipants.length === 0) {
+        list.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">Aún no hay participantes</p>';
+        return;
+      }
+
+      list.innerHTML = tempParticipants.map(p => {
+        const user = getUserById(p.userId);
+        return `
+          <div class="participant-item">
+            <div class="participant-info">
+              <div class="participant-avatar">${getInitials(user?.name || 'U')}</div>
+              <div>
+                <div><strong>${user?.name || 'Usuario'}</strong></div>
+                <div class="participant-role">${p.role || 'member'}</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-ghost" onclick="removeTempParticipant('${p.userId}')">
+              <i class="fas fa-times" style="color: var(--danger-color);"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addParticipant() {
+      const select = document.getElementById('add-participant-select');
+      const userId = select.value;
+      if (!userId) return;
+
+      // Verificar que no esté ya añadido
+      if (tempParticipants.some(p => p.userId === userId || p.userId?.toString() === userId)) {
+        showToast('El usuario ya está en el grupo', 'warning');
+        return;
+      }
+
+      tempParticipants.push({ userId, role: 'member' });
+      renderTempParticipantsList();
+      
+      // Actualizar el select para excluir los ya añadidos
+      const participantIds = tempParticipants.map(p => p.userId?.toString());
+      populateUserSelect('add-participant-select', participantIds);
+    }
+
+    function removeTempParticipant(userId) {
+      tempParticipants = tempParticipants.filter(p => p.userId !== userId && p.userId?.toString() !== userId);
+      renderTempParticipantsList();
+      
+      const participantIds = tempParticipants.map(p => p.userId?.toString());
+      populateUserSelect('add-participant-select', participantIds);
     }
 
     function renderParticipantsList(group) {
@@ -652,6 +711,7 @@
 
     function closeModal() {
       document.getElementById('group-modal').classList.remove('active');
+      tempParticipants = [];
     }
 
     async function saveGroup() {
@@ -664,7 +724,7 @@
         return;
       }
 
-      const data = { name, description };
+      const data = { name, description, participants: tempParticipants };
       const btn = document.getElementById('save-btn');
       btn.disabled = true;
 
@@ -783,8 +843,9 @@
           <div class="settlements-section">
             <h4 class="settlements-title">
               <i class="fas fa-exchange-alt"></i>
-              Sugerencias de pago
+              Pagos sugeridos para saldar deudas
             </h4>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">Estos pagos equilibrarían las cuentas del grupo.</p>
         `;
 
         data.data.settlements.forEach(settlement => {
@@ -793,8 +854,10 @@
           
           html += `
             <div class="settlement-item">
+              <div class="balance-avatar" style="width: 28px; height: 28px; font-size: 0.7rem;">${getInitials(fromUser.name)}</div>
               <div style="font-weight: 500;">${fromUser.name}</div>
               <i class="settlement-arrow fas fa-arrow-right"></i>
+              <div class="balance-avatar" style="width: 28px; height: 28px; font-size: 0.7rem;">${getInitials(toUser.name)}</div>
               <div style="font-weight: 500;">${toUser.name}</div>
               <div class="settlement-amount">${formatMoney(settlement.amount)}</div>
             </div>

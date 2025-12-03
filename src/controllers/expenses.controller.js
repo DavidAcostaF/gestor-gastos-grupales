@@ -1,4 +1,4 @@
-export default function buildExpensesController({ expenseRepo }) {
+export default function buildExpensesController({ expenseRepo, budgetRepo }) {
   if (!expenseRepo) throw new Error("expenseRepo es requerido en expenses.controller");
 
   return {
@@ -7,6 +7,7 @@ export default function buildExpensesController({ expenseRepo }) {
         const {
           groupId,
           userId,
+          budgetId,
           categoryId,
           amount,
           date,
@@ -14,6 +15,8 @@ export default function buildExpensesController({ expenseRepo }) {
           details,
           attachments,
           tags,
+          splitType,
+          splitDetails,
         } = req.body || {};
 
         // Validaciones básicas
@@ -43,6 +46,7 @@ export default function buildExpensesController({ expenseRepo }) {
         const doc = {
           groupId,
           userId,
+          budgetId: budgetId || null,
           categoryId: categoryId || null,
           amount,
           date: date ? new Date(date) : now,
@@ -50,6 +54,8 @@ export default function buildExpensesController({ expenseRepo }) {
           details: details || [],
           attachments: attachments || [],
           tags: tags || [],
+          splitType: splitType || "equal",
+          splitDetails: splitDetails || [],
           createdAt: now,
           updatedAt: now,
           deletedAt: null,
@@ -57,6 +63,19 @@ export default function buildExpensesController({ expenseRepo }) {
 
         const id = await expenseRepo.create(doc);
         const created = await expenseRepo.getById(id);
+
+        // Actualizar el presupuesto si hay uno asociado
+        if (budgetId && budgetRepo) {
+          try {
+            const budget = await budgetRepo.getById(budgetId);
+            if (budget) {
+              const newSpent = (budget.spent || 0) + amount;
+              await budgetRepo.update(budgetId, { spent: newSpent, updatedAt: now });
+            }
+          } catch (e) {
+            console.error("Error actualizando presupuesto:", e);
+          }
+        }
 
         return res.status(201).json({ success: true, data: created });
       } catch (error) {

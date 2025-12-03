@@ -54,7 +54,7 @@ app.use("/api/v1/protected", protectedRoutes);
 // Rutas de los demas CRUDs
 // Inyección de dependencias mejor practica
 app.use("/api/v1/users", buildUsersRouter({ userRepo, verifyToken }));
-app.use("/api/v1/expenses", verifyToken, buildExpensesRouter({ expenseRepo }));
+app.use("/api/v1/expenses", verifyToken, buildExpensesRouter({ expenseRepo, budgetRepo }));
 app.use("/api/v1/groups", verifyToken, buildGroupsRouter({ groupRepo, expenseRepo, paymentRepo, userRepo }));
 app.use("/api/v1/budgets", buildBudgetsRouter({ budgetRepo, verifyToken }));
 

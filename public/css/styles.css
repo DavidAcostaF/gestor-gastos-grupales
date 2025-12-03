@@ -1,39 +1,49 @@
-/* ===== VARIABLES CSS ===== */
+/* ===== VARIABLES CSS - PALETA MINIMALISTA ===== */
 :root {
-  --primary-color: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-light: #e0e7ff;
-  --secondary-color: #10b981;
-  --secondary-hover: #059669;
-  --danger-color: #ef4444;
-  --danger-hover: #dc2626;
-  --warning-color: #f59e0b;
-  --info-color: #3b82f6;
+  /* Colores principales - Tonos neutros y elegantes */
+  --primary-color: #18181b;
+  --primary-hover: #27272a;
+  --primary-light: #f4f4f5;
+  --secondary-color: #52525b;
+  --secondary-hover: #3f3f46;
+  --danger-color: #dc2626;
+  --danger-hover: #b91c1c;
+  --warning-color: #d97706;
+  --info-color: #0891b2;
   
-  --bg-primary: #f8fafc;
+  /* Fondos - Blancos y grises suaves */
+  --bg-primary: #fafafa;
   --bg-secondary: #ffffff;
-  --bg-dark: #1e293b;
+  --bg-dark: #18181b;
   --bg-card: #ffffff;
   
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-light: #94a3b8;
+  /* Textos - Escala de grises */
+  --text-primary: #18181b;
+  --text-secondary: #71717a;
+  --text-light: #a1a1aa;
   --text-white: #ffffff;
   
-  --border-color: #e2e8f0;
-  --border-radius: 12px;
-  --border-radius-sm: 8px;
-  --border-radius-lg: 16px;
+  /* Bordes y radios - Más suaves */
+  --border-color: #e4e4e7;
+  --border-radius: 8px;
+  --border-radius-sm: 6px;
+  --border-radius-lg: 12px;
   
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* Sombras - Muy sutiles */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  --shadow-xl: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
   
-  --transition: all 0.3s ease;
+  --transition: all 0.2s ease;
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --success-color: #10b981;
+  --primary-gradient: linear-gradient(135deg, #18181b 0%, #3f3f46 100%);
+  --success-color: #16a34a;
+  
+  /* Acento - Teal sutil para acciones positivas */
+  --accent-color: #0d9488;
+  --accent-hover: #0f766e;
+  --accent-light: #ccfbf1;
 }
 
 /* ===== RESET Y BASE ===== */
@@ -135,18 +145,16 @@ img {
 
 .btn-primary:hover:not(:disabled) {
   background: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow);
 }
 
 .btn-secondary {
-  background: var(--secondary-color);
+  background: var(--accent-color);
   color: var(--text-white);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--secondary-hover);
-  transform: translateY(-2px);
+  background: var(--accent-hover);
 }
 
 .btn-danger {
@@ -259,13 +267,14 @@ img {
 .card {
   background: var(--bg-card);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   padding: 1.5rem;
   transition: var(--transition);
+  border: 1px solid var(--border-color);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow);
 }
 
 .card-header {
@@ -301,7 +310,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary-color) 0%, #8b5cf6 100%);
+  background: var(--bg-primary);
   padding: 1rem;
 }
 
@@ -313,8 +322,9 @@ img {
 .auth-card {
   background: var(--bg-secondary);
   border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-lg);
   padding: 2.5rem;
+  border: 1px solid var(--border-color);
 }
 
 .auth-logo {
@@ -323,13 +333,14 @@ img {
 }
 
 .auth-logo h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  letter-spacing: -0.025em;
 }
 
 .auth-logo h1 span {
@@ -392,31 +403,34 @@ img {
 
 /* ===== SIDEBAR ===== */
 .sidebar {
-  width: 280px;
-  background: var(--bg-dark);
-  color: var(--text-white);
+  width: 260px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   position: fixed;
   height: 100vh;
   overflow-y: auto;
   z-index: 100;
   transition: var(--transition);
+  border-right: 1px solid var(--border-color);
 }
 
 .sidebar-header {
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 1.25rem;
-  font-weight: 700;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
 .sidebar-logo span {
-  font-size: 1.75rem;
+  font-size: 1.25rem;
+  color: var(--accent-color);
 }
 
 .sidebar-nav {
@@ -440,21 +454,23 @@ img {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.875rem 1.5rem;
-  color: rgba(255, 255, 255, 0.7);
+  padding: 0.75rem 1.5rem;
+  color: var(--text-secondary);
   transition: var(--transition);
-  border-left: 3px solid transparent;
+  border-left: 2px solid transparent;
+  font-size: 0.9rem;
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-white);
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .nav-link.active {
-  background: rgba(99, 102, 241, 0.2);
-  color: var(--text-white);
+  background: var(--primary-light);
+  color: var(--text-primary);
   border-left-color: var(--primary-color);
+  font-weight: 500;
 }
 
 .nav-link i {
@@ -465,7 +481,7 @@ img {
 
 .sidebar-footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border-color);
   margin-top: auto;
 }
 
@@ -511,7 +527,7 @@ img {
 /* ===== CONTENIDO PRINCIPAL ===== */
 .main-content {
   flex: 1;
-  margin-left: 280px;
+  margin-left: 260px;
   min-height: 100vh;
   background: var(--bg-primary);
 }
@@ -594,27 +610,27 @@ img {
 .stat-card {
   background: var(--bg-card);
   border-radius: var(--border-radius);
-  padding: 1.5rem;
-  box-shadow: var(--shadow);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   gap: 1rem;
   transition: var(--transition);
+  border: 1px solid var(--border-color);
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow);
 }
 
 .stat-icon {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--border-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
 .stat-icon.primary {
@@ -623,8 +639,8 @@ img {
 }
 
 .stat-icon.success {
-  background: #d1fae5;
-  color: var(--secondary-color);
+  background: #dcfce7;
+  color: var(--success-color);
 }
 
 .stat-icon.warning {
@@ -633,7 +649,7 @@ img {
 }
 
 .stat-icon.info {
-  background: #dbeafe;
+  background: #cffafe;
   color: var(--info-color);
 }
 
@@ -654,8 +670,9 @@ img {
 .table-container {
   background: var(--bg-card);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .table-header {
@@ -729,8 +746,8 @@ tbody tr:last-child td {
 }
 
 .badge-success {
-  background: #d1fae5;
-  color: #065f46;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .badge-warning {
@@ -744,8 +761,8 @@ tbody tr:last-child td {
 }
 
 .badge-info {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #cffafe;
+  color: #0e7490;
 }
 
 /* ===== MODALES ===== */
@@ -966,7 +983,7 @@ tbody tr:last-child td {
 }
 
 .toast-success {
-  background: var(--secondary-color);
+  background: var(--success-color);
   color: white;
 }
 
@@ -993,6 +1010,7 @@ tbody tr:last-child td {
 
   .sidebar.open {
     transform: translateX(0);
+    box-shadow: var(--shadow-xl);
   }
 
   .main-content {
