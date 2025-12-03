@@ -118,6 +118,24 @@
                         </div>
                     </div>
 
+                    <!-- Balances Section -->
+                    <div class="table-container" style="margin-bottom: 2rem;">
+                        <div class="table-header">
+                            <h3 class="table-title">
+                                <i class="fas fa-balance-scale" style="margin-right: 0.5rem;"></i>
+                                Balances por Usuario
+                            </h3>
+                            <div class="table-actions">
+                                <select class="form-select" id="balance-group-filter" style="width: 200px;" onchange="loadBalances()">
+                                    <option value="">Seleccionar grupo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="balances-container" style="padding: 1rem;">
+                            <p style="color: var(--text-secondary); text-align: center;">Selecciona un grupo para ver los balances</p>
+                        </div>
+                    </div>
+
                     <!-- Payments Table -->
                     <div class="table-container">
                         <div class="table-header">
@@ -190,12 +208,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="payment-from" class="form-label">Pagador
-                                *</label>
-                            <select id="payment-from" class="form-select"
-                                required>
-                                <option value>Seleccionar pagador</option>
-                            </select>
+                            <label class="form-label">Pagador (Tú)</label>
+                            <div class="current-user-display" id="current-user-display" style="padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--border-radius); display: flex; align-items: center; gap: 0.5rem;">
+                                <div class="avatar-sm" id="payer-avatar">U</div>
+                                <span id="payer-name">Usuario</span>
+                            </div>
+                            <input type="hidden" id="payment-from">
                         </div>
 
                         <div class="form-group">
@@ -284,6 +302,8 @@
     let allPayments = [];
     let allGroups = [];
     let allUsers = [];
+    let allExpenses = [];
+    let currentUserId = null;
 
     // Verificar autenticación
     checkAuth();
@@ -291,8 +311,24 @@
     loadData();
 
     async function loadData() {
-      await Promise.all([loadGroups(), loadUsers()]);
+      // Obtener usuario actual
+      const user = getCurrentUser();
+      currentUserId = user?._id || user?.id;
+      
+      await Promise.all([loadGroups(), loadUsers(), loadExpenses()]);
       await loadPayments();
+      populateBalanceGroupFilter();
+    }
+
+    async function loadExpenses() {
+      try {
+        const response = await apiRequest('/api/v1/expenses');
+        if (response.success) {
+          allExpenses = response.data;
+        }
+      } catch (error) {
+        console.error('Error loading expenses:', error);
+      }
     }
 
     async function loadGroups() {
@@ -324,32 +360,132 @@
       select.innerHTML = `<option value="">Seleccionar grupo</option>` + options;
     }
 
+    function populateBalanceGroupFilter() {
+      const select = document.getElementById('balance-group-filter');
+      const options = allGroups.map(g => `<option value="${g._id}">${g.name}</option>`).join('');
+      select.innerHTML = `<option value="">Seleccionar grupo</option>` + options;
+    }
+
     function loadGroupMembers() {
       const groupId = document.getElementById('payment-group').value;
-      const fromSelect = document.getElementById('payment-from');
       const toSelect = document.getElementById('payment-to');
       
       if (!groupId) {
-        fromSelect.innerHTML = '<option value="">Seleccionar pagador</option>';
         toSelect.innerHTML = '<option value="">Seleccionar receptor</option>';
         return;
       }
 
       const group = allGroups.find(g => g._id === groupId);
-      if (group && group.members) {
-        const memberOptions = group.members.map(memberId => {
-          const user = allUsers.find(u => u._id === memberId);
-          return user ? `<option value="${user._id}">${user.name || user.email}</option>` : '';
-        }).join('');
+      const participants = group?.participants || [];
+      
+      if (participants.length > 0) {
+        const memberOptions = participants
+          .filter(p => p.userId !== currentUserId) // Excluir usuario actual
+          .map(p => {
+            const user = allUsers.find(u => u._id === p.userId);
+            return user ? `<option value="${user._id}">${user.name || user.email}</option>` : '';
+          }).join('');
         
-        fromSelect.innerHTML = '<option value="">Seleccionar pagador</option>' + memberOptions;
         toSelect.innerHTML = '<option value="">Seleccionar receptor</option>' + memberOptions;
       } else {
-        // Si no hay miembros definidos, mostrar todos los usuarios
-        const userOptions = allUsers.map(u => `<option value="${u._id}">${u.name || u.email}</option>`).join('');
-        fromSelect.innerHTML = '<option value="">Seleccionar pagador</option>' + userOptions;
+        // Si no hay participantes, mostrar todos los usuarios excepto el actual
+        const userOptions = allUsers
+          .filter(u => u._id !== currentUserId)
+          .map(u => `<option value="${u._id}">${u.name || u.email}</option>`).join('');
         toSelect.innerHTML = '<option value="">Seleccionar receptor</option>' + userOptions;
       }
+    }
+
+    function loadBalances() {
+      const groupId = document.getElementById('balance-group-filter').value;
+      const container = document.getElementById('balances-container');
+      
+      if (!groupId) {
+        container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Selecciona un grupo para ver los balances</p>';
+        return;
+      }
+
+      // Calcular balances basados en gastos y pagos del grupo
+      const groupExpenses = allExpenses.filter(e => e.groupId === groupId);
+      const groupPayments = allPayments.filter(p => p.groupId === groupId);
+      const group = allGroups.find(g => g._id === groupId);
+      const participants = group?.participants || [];
+
+      // Mapa de balances: userId -> balance
+      const balances = {};
+      
+      // Inicializar participantes
+      participants.forEach(p => {
+        balances[p.userId] = 0;
+      });
+
+      // Sumar gastos (quien pagó tiene saldo positivo, los demás deben)
+      groupExpenses.forEach(expense => {
+        const payerId = expense.userId;
+        const amount = expense.amount || 0;
+        const participantCount = participants.length || 1;
+        const sharePerPerson = amount / participantCount;
+        
+        // El pagador tiene un crédito
+        if (balances[payerId] !== undefined) {
+          balances[payerId] += amount - sharePerPerson;
+        } else {
+          balances[payerId] = amount - sharePerPerson;
+        }
+        
+        // Los demás deben su parte
+        participants.forEach(p => {
+          if (p.userId !== payerId) {
+            balances[p.userId] = (balances[p.userId] || 0) - sharePerPerson;
+          }
+        });
+      });
+
+      // Ajustar por pagos realizados
+      groupPayments.filter(p => p.status === 'completed').forEach(payment => {
+        const amount = payment.amount || 0;
+        if (balances[payment.fromUserId] !== undefined) {
+          balances[payment.fromUserId] += amount; // El que paga reduce su deuda
+        }
+        if (balances[payment.toUserId] !== undefined) {
+          balances[payment.toUserId] -= amount; // El que recibe reduce su crédito
+        }
+      });
+
+      // Renderizar balances
+      if (Object.keys(balances).length === 0) {
+        container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No hay participantes en este grupo</p>';
+        return;
+      }
+
+      const balanceCards = Object.entries(balances).map(([userId, balance]) => {
+        const user = allUsers.find(u => u._id === userId);
+        const userName = user?.name || 'Usuario';
+        const isPositive = balance >= 0;
+        const balanceClass = isPositive ? 'success' : 'danger';
+        const balanceIcon = isPositive ? 'fa-arrow-up' : 'fa-arrow-down';
+        const balanceText = isPositive ? 'A favor' : 'Debe';
+        
+        return `
+          <div class="balance-card" style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div class="avatar-sm">${(userName).charAt(0)}</div>
+              <div>
+                <div style="font-weight: 600;">${userName}</div>
+                <small style="color: var(--text-secondary);">${balanceText}</small>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight: 700; color: var(--${balanceClass}-color); font-size: 1.1rem;">
+                <i class="fas ${balanceIcon}" style="font-size: 0.8rem;"></i>
+                ${formatCurrency(Math.abs(balance))}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">${balanceCards}</div>`;
     }
 
     async function loadPayments() {
@@ -482,6 +618,7 @@
         if (response.success) {
           showToast('Pago marcado como completado', 'success');
           loadPayments();
+          loadBalances(); // Actualizar balances
         }
       } catch (error) {
         showToast('Error al actualizar pago', 'error');
@@ -496,6 +633,12 @@
       form.reset();
       document.getElementById('payment-id').value = '';
       document.getElementById('payment-date').value = new Date().toISOString().split('T')[0];
+      
+      // Mostrar usuario actual como pagador
+      const currentUser = getCurrentUser();
+      document.getElementById('payer-avatar').textContent = (currentUser?.name || 'U').charAt(0);
+      document.getElementById('payer-name').textContent = currentUser?.name || currentUser?.email || 'Usuario';
+      document.getElementById('payment-from').value = currentUser?._id || currentUser?.id || '';
 
       if (mode === 'create') {
         title.textContent = 'Registrar Pago';
@@ -507,13 +650,20 @@
           document.getElementById('payment-group').value = payment.groupId || '';
           loadGroupMembers();
           setTimeout(() => {
-            document.getElementById('payment-from').value = payment.fromUserId || '';
             document.getElementById('payment-to').value = payment.toUserId || '';
           }, 100);
           document.getElementById('payment-amount').value = payment.amount || '';
           document.getElementById('payment-status').value = payment.status || 'pending';
           document.getElementById('payment-date').value = payment.date ? payment.date.split('T')[0] : '';
           document.getElementById('payment-notes').value = payment.notes || '';
+          
+          // Si está editando, mantener el pagador original
+          const fromUser = allUsers.find(u => u._id === payment.fromUserId);
+          if (fromUser) {
+            document.getElementById('payer-avatar').textContent = (fromUser.name || 'U').charAt(0);
+            document.getElementById('payer-name').textContent = fromUser.name || fromUser.email || 'Usuario';
+            document.getElementById('payment-from').value = payment.fromUserId;
+          }
         }
       }
 
@@ -569,6 +719,7 @@
           showToast(id ? 'Pago actualizado' : 'Pago registrado', 'success');
           closeModal();
           loadPayments();
+          loadBalances(); // Actualizar balances
         } else {
           showToast(response.message || 'Error al guardar', 'error');
         }
@@ -597,6 +748,7 @@
           showToast('Pago eliminado', 'success');
           closeDeleteModal();
           loadPayments();
+          loadBalances(); // Actualizar balances
         } else {
           showToast('Error al eliminar', 'error');
         }

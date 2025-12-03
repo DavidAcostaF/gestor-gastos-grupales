@@ -464,6 +464,22 @@
         return;
       }
 
+      // Verificar si se excede el presupuesto
+      if (budgetId) {
+        const budget = allBudgets.find(b => b._id === budgetId);
+        if (budget) {
+          const currentSpent = budget.spent || 0;
+          const limit = budget.limit || 0;
+          const newTotal = currentSpent + amount;
+          
+          if (newTotal > limit) {
+            const exceed = newTotal - limit;
+            const confirmed = confirm(`⚠️ Este gasto excede el presupuesto "${budget.category}" por ${formatCurrency(exceed)}.\n\nPresupuesto: ${formatCurrency(limit)}\nGastado actual: ${formatCurrency(currentSpent)}\nNuevo gasto: ${formatCurrency(amount)}\nTotal resultante: ${formatCurrency(newTotal)}\n\n¿Deseas registrar el gasto de todos modos?`);
+            if (!confirmed) return;
+          }
+        }
+      }
+
       // Obtener userId del localStorage
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const userId = user.id || 'unknown';

@@ -96,7 +96,6 @@
                   <th>Límite</th>
                   <th>Gastado</th>
                   <th>Progreso</th>
-                  <th>Período</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -142,25 +141,6 @@
           <div class="form-group">
             <label for="budget-limit" class="form-label">Límite de gasto *</label>
             <input type="number" id="budget-limit" class="form-input" placeholder="0.00" step="0.01" min="0" required>
-          </div>
-
-          <div class="form-group">
-            <label for="budget-period" class="form-label">Período</label>
-            <select id="budget-period" class="form-select">
-              <option value="monthly">Mensual</option>
-              <option value="weekly">Semanal</option>
-              <option value="yearly">Anual</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="budget-start" class="form-label">Fecha inicio</label>
-            <input type="date" id="budget-start" class="form-input">
-          </div>
-
-          <div class="form-group">
-            <label for="budget-end" class="form-label">Fecha fin</label>
-            <input type="date" id="budget-end" class="form-input">
           </div>
         </form>
       </div>
@@ -249,7 +229,7 @@
       if (budgets.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="7">
+            <td colspan="6">
               <div class="empty-state">
                 <i class="fas fa-piggy-bank"></i>
                 <h3>No hay presupuestos</h3>
@@ -284,9 +264,6 @@
                 </div>
                 <span style="font-size: 0.8rem; color: var(--text-secondary);">${percentage.toFixed(0)}%</span>
               </div>
-            </td>
-            <td>
-              <span class="badge badge-info">${budget.period || 'Mensual'}</span>
             </td>
             <td>
               <div class="flex" style="gap: 0.5rem;">
@@ -331,9 +308,6 @@
           document.getElementById('budget-group').value = budget.groupId || '';
           document.getElementById('budget-category').value = budget.category || '';
           document.getElementById('budget-limit').value = budget.limit || '';
-          document.getElementById('budget-period').value = budget.period || 'monthly';
-          document.getElementById('budget-start').value = budget.startDate ? budget.startDate.split('T')[0] : '';
-          document.getElementById('budget-end').value = budget.endDate ? budget.endDate.split('T')[0] : '';
         }
       }
 
@@ -349,9 +323,6 @@
       const groupId = document.getElementById('budget-group').value;
       const category = document.getElementById('budget-category').value;
       const limit = parseFloat(document.getElementById('budget-limit').value);
-      const period = document.getElementById('budget-period').value;
-      const startDate = document.getElementById('budget-start').value;
-      const endDate = document.getElementById('budget-end').value;
 
       if (!groupId || !category || !limit) {
         showToast('Completa los campos obligatorios', 'error');
@@ -361,10 +332,7 @@
       const data = { 
         groupId, 
         category, 
-        limit, 
-        period,
-        startDate: startDate || null,
-        endDate: endDate || null
+        limit
       };
       
       const btn = document.getElementById('save-btn');

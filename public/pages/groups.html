@@ -513,8 +513,14 @@
 
       if (mode === 'create') {
         title.textContent = 'Nuevo Grupo';
-        document.getElementById('participants-list').innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">Aún no hay participantes</p>';
-        populateUserSelect('add-participant-select', []);
+        // Auto-add creator to participants
+        const currentUser = getCurrentUser();
+        if (currentUser && currentUser._id) {
+          tempParticipants.push({ userId: currentUser._id, role: 'admin' });
+        }
+        renderTempParticipantsList();
+        const participantIds = tempParticipants.map(p => p.userId?.toString());
+        populateUserSelect('add-participant-select', participantIds);
       } else {
         title.textContent = 'Editar Grupo';
         
