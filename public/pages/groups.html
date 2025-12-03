@@ -306,7 +306,7 @@
               <select id="add-participant-select" class="form-select">
                 <option value="">Seleccionar usuario...</option>
               </select>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="addParticipant()">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="addTempParticipant()">
                 <i class="fas fa-plus"></i> Agregar
               </button>
             </div>
@@ -417,7 +417,18 @@
       try {
         const response = await apiRequest('/api/v1/groups');
         if (response.success) {
-          allGroups = response.data;
+          // Filtrar solo grupos donde el usuario actual es participante
+          const currentUser = getCurrentUser();
+          const currentUserId = currentUser?.id || currentUser?._id;
+          
+          allGroups = response.data.filter(group => {
+            return (group.participants || []).some(p => 
+              p.userId === currentUserId || 
+              p.userId?.toString() === currentUserId ||
+              p.userId === currentUserId?.toString()
+            );
+          });
+          
           renderGroups(allGroups);
         }
       } catch (error) {
@@ -515,8 +526,8 @@
         title.textContent = 'Nuevo Grupo';
         // Auto-add creator to participants
         const currentUser = getCurrentUser();
-        if (currentUser && currentUser._id) {
-          tempParticipants.push({ userId: currentUser._id, role: 'admin' });
+        if (currentUser && (currentUser.id || currentUser._id)) {
+          tempParticipants.push({ userId: currentUser.id || currentUser._id, role: 'admin' });
         }
         renderTempParticipantsList();
         const participantIds = tempParticipants.map(p => p.userId?.toString());
@@ -566,7 +577,7 @@
       }).join('');
     }
 
-    function addParticipant() {
+    function addTempParticipant() {
       const select = document.getElementById('add-participant-select');
       const userId = select.value;
       if (!userId) return;

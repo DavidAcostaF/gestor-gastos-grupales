@@ -369,9 +369,11 @@
     function loadGroupMembers() {
       const groupId = document.getElementById('payment-group').value;
       const toSelect = document.getElementById('payment-to');
+      const currentUser = getCurrentUser();
+      const currentUserId = currentUser?.id || currentUser?._id;
       
       if (!groupId) {
-        toSelect.innerHTML = '<option value="">Seleccionar receptor</option>';
+        toSelect.innerHTML = '<option value="">Primero selecciona un grupo</option>';
         return;
       }
 
@@ -379,20 +381,26 @@
       const participants = group?.participants || [];
       
       if (participants.length > 0) {
-        const memberOptions = participants
-          .filter(p => p.userId !== currentUserId) // Excluir usuario actual
-          .map(p => {
-            const user = allUsers.find(u => u._id === p.userId);
-            return user ? `<option value="${user._id}">${user.name || user.email}</option>` : '';
-          }).join('');
+        // Filtrar participantes excluyendo al usuario actual
+        const otherParticipants = participants.filter(p => {
+          const odId = p.userId?.toString() || p.userId;
+          return odId !== currentUserId && p.userId !== currentUserId;
+        });
+
+        if (otherParticipants.length === 0) {
+          toSelect.innerHTML = '<option value="">No hay otros participantes en el grupo</option>';
+          return;
+        }
+
+        const memberOptions = otherParticipants.map(p => {
+          const odId = p.userId?.toString() || p.userId;
+          const user = allUsers.find(u => u._id === odId || u._id?.toString() === odId);
+          return user ? `<option value="${user._id}">${user.name || user.email}</option>` : '';
+        }).filter(opt => opt !== '').join('');
         
         toSelect.innerHTML = '<option value="">Seleccionar receptor</option>' + memberOptions;
       } else {
-        // Si no hay participantes, mostrar todos los usuarios excepto el actual
-        const userOptions = allUsers
-          .filter(u => u._id !== currentUserId)
-          .map(u => `<option value="${u._id}">${u.name || u.email}</option>`).join('');
-        toSelect.innerHTML = '<option value="">Seleccionar receptor</option>' + userOptions;
+        toSelect.innerHTML = '<option value="">Este grupo no tiene participantes</option>';
       }
     }
 
