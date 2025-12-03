@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 export default function buildGroupsController({ groupRepo, expenseRepo, paymentRepo, userRepo }) {
   if (!groupRepo) throw new Error("groupRepo es requerido en groups.controller");
 
@@ -29,10 +31,17 @@ export default function buildGroupsController({ groupRepo, expenseRepo, paymentR
         }
 
         const now = new Date();
+        
+        // Convertir userId de los participantes a ObjectId
+        const processedParticipants = (participants || []).map(p => ({
+          userId: typeof p.userId === 'string' ? new ObjectId(p.userId) : p.userId,
+          role: p.role || 'member'
+        }));
+        
         const doc = {
           name,
           description: description || null,
-          participants: participants || [],
+          participants: processedParticipants,
           categories: categories || [],
           tags: tags || [],
           createdAt: now,
@@ -80,6 +89,14 @@ export default function buildGroupsController({ groupRepo, expenseRepo, paymentR
         delete updateFields._id;
         delete updateFields.createdAt;
         delete updateFields.deletedAt;
+
+        // Convertir userId de los participantes a ObjectId si existen
+        if (updateFields.participants && Array.isArray(updateFields.participants)) {
+          updateFields.participants = updateFields.participants.map(p => ({
+            userId: typeof p.userId === 'string' ? new ObjectId(p.userId) : p.userId,
+            role: p.role || 'member'
+          }));
+        }
 
         const ok = await groupRepo.update(req.params.id, updateFields);
         if (!ok) {
