@@ -486,6 +486,21 @@ class PaymentsManager extends HTMLElement {
 
   render() {
     this.shadowRoot.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          flex: 1 1 auto;
+          min-height: 100vh;
+          background: #fafafa;
+          overflow-x: hidden;
+        }
+        .main-content {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          min-height: 100vh;
+        }
+      </style>
       <link rel="stylesheet" href="/css/styles.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       <main class="main-content">

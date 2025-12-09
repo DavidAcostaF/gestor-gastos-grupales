@@ -10,13 +10,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
-<body>
-  <div class="app-layout">
+<body style="margin: 0; padding: 0;">
+  <div class="app-layout" style="display: flex; margin: 0; padding: 0; gap: 0;">
     <script type="module" src="/components/app-sidebar.js"></script>
-    <app-sidebar active-page="groups"></app-sidebar>
+    <app-sidebar active-page="groups" style="flex-shrink: 0;"></app-sidebar>
 
     <script type="module" src="/components/groups-manager.js"></script>
-    <groups-manager></groups-manager>
+    <groups-manager style="flex: 1; margin: 0; padding: 0;"></groups-manager>
   </div>
 
   <script type="module" src="/components/toast-container.js"></script>

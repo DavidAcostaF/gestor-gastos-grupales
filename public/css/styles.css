@@ -10,36 +10,36 @@
   --danger-hover: #b91c1c;
   --warning-color: #d97706;
   --info-color: #0891b2;
-  
+
   /* Fondos - Blancos y grises suaves */
   --bg-primary: #fafafa;
   --bg-secondary: #ffffff;
   --bg-dark: #18181b;
   --bg-card: #ffffff;
-  
+
   /* Textos - Escala de grises */
   --text-primary: #18181b;
   --text-secondary: #71717a;
   --text-light: #a1a1aa;
   --text-white: #ffffff;
-  
+
   /* Bordes y radios - Más suaves */
   --border-color: #e4e4e7;
   --border-radius: 8px;
   --border-radius-sm: 6px;
   --border-radius-lg: 12px;
-  
+
   /* Sombras - Muy sutiles */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
   --shadow-lg: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
   --shadow-xl: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
-  
+
   --transition: all 0.2s ease;
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --primary-gradient: linear-gradient(135deg, #18181b 0%, #3f3f46 100%);
   --success-color: #16a34a;
-  
+
   /* Acento - Teal sutil para acciones positivas */
   --accent-color: #0d9488;
   --accent-hover: #0f766e;
@@ -108,14 +108,37 @@ img {
   text-align: center;
 }
 
-.mt-1 { margin-top: 0.5rem; }
-.mt-2 { margin-top: 1rem; }
-.mt-3 { margin-top: 1.5rem; }
-.mt-4 { margin-top: 2rem; }
-.mb-1 { margin-bottom: 0.5rem; }
-.mb-2 { margin-bottom: 1rem; }
-.mb-3 { margin-bottom: 1.5rem; }
-.mb-4 { margin-bottom: 2rem; }
+.mt-1 {
+  margin-top: 0.5rem;
+}
+
+.mt-2 {
+  margin-top: 1rem;
+}
+
+.mt-3 {
+  margin-top: 1.5rem;
+}
+
+.mt-4 {
+  margin-top: 2rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.mb-3 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 2rem;
+}
 
 /* ===== BOTONES ===== */
 .btn {
@@ -399,6 +422,10 @@ img {
 .app-layout {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 /* ===== SIDEBAR ===== */
@@ -527,9 +554,9 @@ img {
 /* ===== CONTENIDO PRINCIPAL ===== */
 .main-content {
   flex: 1;
-  margin-left: 260px;
   min-height: 100vh;
   background: var(--bg-primary);
+  width: 100%;
 }
 
 .main-header {
@@ -596,7 +623,7 @@ img {
 }
 
 .main-container {
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 /* ===== DASHBOARD ===== */
@@ -704,7 +731,8 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   padding: 1rem 1.5rem;
   text-align: left;
 }
@@ -976,6 +1004,7 @@ tbody tr:last-child td {
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -1044,7 +1073,8 @@ tbody tr:last-child td {
     align-items: stretch;
   }
 
-  th, td {
+  th,
+  td {
     padding: 0.75rem 1rem;
   }
 

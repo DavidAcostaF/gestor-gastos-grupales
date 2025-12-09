@@ -1,6 +1,7 @@
 /**
  * App Sidebar Web Component
  * Shared navigation sidebar for authenticated pages with Shadow DOM
+ * Uses the original light/minimalist color scheme
  */
 import { logout, getCurrentUser } from '../js/auth.js';
 import { getInitials } from '../js/api.js';
@@ -62,29 +63,41 @@ class AppSidebar extends HTMLElement {
     this.shadowRoot.innerHTML = `
             <style>
                 :host {
-                    display: block;
-                    width: 280px;
-                    height: 100vh;
-                    background: linear-gradient(180deg, var(--surface, #1e1e2e) 0%, var(--surface-dark, #12121a) 100%);
-                    border-right: 1px solid var(--border, rgba(255,255,255,0.1));
                     display: flex;
                     flex-direction: column;
-                    font-family: 'Inter', sans-serif;
+                    width: 260px;
+                    min-width: 260px;
+                    max-width: 260px;
+                    height: 100vh;
+                    background: #ffffff;
+                    border-right: 1px solid #e4e4e7;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    position: sticky;
+                    left: 0;
+                    top: 0;
+                    z-index: 100;
+                    flex-shrink: 0;
+                    box-sizing: border-box;
                 }
 
                 .sidebar-header {
                     padding: 1.5rem;
-                    border-bottom: 1px solid var(--border, rgba(255,255,255,0.1));
+                    border-bottom: 1px solid #e4e4e7;
                 }
 
                 .sidebar-logo {
-                    font-size: 1.5rem;
-                    font-weight: 700;
-                    color: var(--text-primary, #fff);
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-size: 1.125rem;
+                    font-weight: 600;
+                    color: #18181b;
+                    letter-spacing: -0.025em;
                 }
 
                 .sidebar-logo span {
-                    color: var(--primary, #6366f1);
+                    font-size: 1.25rem;
+                    color: #0d9488;
                 }
 
                 nav {
@@ -94,16 +107,15 @@ class AppSidebar extends HTMLElement {
                 }
 
                 .nav-section {
-                    padding: 0 0.75rem;
-                    margin-bottom: 1rem;
+                    margin-bottom: 1.5rem;
                 }
 
                 .nav-section-title {
+                    padding: 0.5rem 1.5rem;
                     font-size: 0.75rem;
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
-                    color: var(--text-muted, rgba(255,255,255,0.4));
-                    padding: 0.5rem 0.75rem;
+                    color: #a1a1aa;
                     font-weight: 600;
                 }
 
@@ -111,34 +123,36 @@ class AppSidebar extends HTMLElement {
                     display: flex;
                     align-items: center;
                     gap: 0.75rem;
-                    padding: 0.75rem;
-                    margin: 0.125rem 0;
-                    border-radius: 0.75rem;
-                    color: var(--text-secondary, rgba(255,255,255,0.7));
+                    padding: 0.75rem 1.5rem;
+                    color: #71717a;
                     text-decoration: none;
-                    font-size: 0.875rem;
-                    font-weight: 500;
+                    font-size: 0.9rem;
                     transition: all 0.2s ease;
+                    border-left: 2px solid transparent;
                 }
 
                 .nav-link:hover {
-                    background: var(--surface-hover, rgba(255,255,255,0.05));
-                    color: var(--text-primary, #fff);
+                    background: #fafafa;
+                    color: #18181b;
                 }
 
                 .nav-link.active {
-                    background: var(--primary, #6366f1);
-                    color: #fff;
+                    background: #f4f4f5;
+                    color: #18181b;
+                    border-left-color: #18181b;
+                    font-weight: 500;
                 }
 
                 .nav-link i {
-                    width: 1.25rem;
+                    font-size: 1.25rem;
+                    width: 24px;
                     text-align: center;
                 }
 
                 .sidebar-footer {
-                    padding: 1rem;
-                    border-top: 1px solid var(--border, rgba(255,255,255,0.1));
+                    padding: 1rem 1.5rem;
+                    border-top: 1px solid #e4e4e7;
+                    margin-top: auto;
                 }
 
                 .user-info {
@@ -151,13 +165,13 @@ class AppSidebar extends HTMLElement {
                     width: 40px;
                     height: 40px;
                     border-radius: 50%;
-                    background: var(--primary, #6366f1);
+                    background: #18181b;
+                    color: #fff;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #fff;
                     font-weight: 600;
-                    font-size: 0.875rem;
+                    font-size: 1rem;
                 }
 
                 .user-details {
@@ -166,17 +180,17 @@ class AppSidebar extends HTMLElement {
                 }
 
                 .user-name {
-                    font-weight: 600;
-                    color: var(--text-primary, #fff);
-                    font-size: 0.875rem;
+                    font-weight: 500;
+                    font-size: 0.95rem;
+                    color: #18181b;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
 
                 .user-email {
-                    font-size: 0.75rem;
-                    color: var(--text-muted, rgba(255,255,255,0.4));
+                    font-size: 0.8rem;
+                    color: #a1a1aa;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -185,16 +199,16 @@ class AppSidebar extends HTMLElement {
                 .btn-ghost {
                     background: transparent;
                     border: none;
-                    color: var(--text-secondary, rgba(255,255,255,0.7));
+                    color: #71717a;
                     padding: 0.5rem;
-                    border-radius: 0.5rem;
+                    border-radius: 6px;
                     cursor: pointer;
                     transition: all 0.2s ease;
                 }
 
                 .btn-ghost:hover {
-                    background: var(--danger, #ef4444);
-                    color: #fff;
+                    background: #fee2e2;
+                    color: #dc2626;
                 }
             </style>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

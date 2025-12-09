@@ -1,6 +1,7 @@
 /**
  * Register Form Web Component
  * Custom element for the registration page with Shadow DOM
+ * Uses the original light/minimalist color scheme
  */
 import { register, login } from '../js/auth.js';
 import { showToast, isValidEmail } from '../js/api.js';
@@ -34,22 +35,22 @@ class RegisterForm extends HTMLElement {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: linear-gradient(135deg, var(--bg-dark, #0a0a0f) 0%, var(--surface-dark, #12121a) 100%);
-                    padding: 2rem;
-                    font-family: 'Inter', sans-serif;
+                    background: #fafafa;
+                    padding: 1rem;
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 }
 
                 .auth-container {
                     width: 100%;
-                    max-width: 420px;
+                    max-width: 440px;
                 }
 
                 .auth-card {
-                    background: var(--surface, #1e1e2e);
-                    border-radius: 1.5rem;
+                    background: #ffffff;
+                    border-radius: 12px;
                     padding: 2.5rem;
-                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-                    border: 1px solid var(--border, rgba(255,255,255,0.1));
+                    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+                    border: 1px solid #e4e4e7;
                 }
 
                 .auth-logo {
@@ -58,26 +59,38 @@ class RegisterForm extends HTMLElement {
                 }
 
                 .auth-logo h1 {
-                    font-size: 2rem;
-                    font-weight: 700;
-                    color: var(--text-primary, #fff);
+                    font-size: 1.5rem;
+                    font-weight: 600;
+                    color: #18181b;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    letter-spacing: -0.025em;
                     margin: 0;
                 }
 
                 .auth-logo h1 span {
-                    color: var(--primary, #6366f1);
+                    font-size: 2rem;
+                    color: #0d9488;
+                }
+
+                .auth-logo p {
+                    color: #71717a;
+                    font-size: 0.875rem;
+                    margin-top: 0.25rem;
                 }
 
                 .auth-title {
                     font-size: 1.5rem;
                     font-weight: 600;
-                    color: var(--text-primary, #fff);
+                    color: #18181b;
                     text-align: center;
                     margin: 0 0 0.5rem 0;
                 }
 
                 .auth-subtitle {
-                    color: var(--text-secondary, rgba(255,255,255,0.7));
+                    color: #71717a;
                     text-align: center;
                     margin: 0 0 2rem 0;
                     font-size: 0.875rem;
@@ -89,32 +102,33 @@ class RegisterForm extends HTMLElement {
 
                 .form-label {
                     display: block;
-                    font-size: 0.875rem;
+                    font-size: 0.9rem;
                     font-weight: 500;
-                    color: var(--text-primary, #fff);
+                    color: #18181b;
                     margin-bottom: 0.5rem;
                 }
 
                 .form-input {
                     width: 100%;
                     padding: 0.875rem 1rem;
-                    background: var(--bg-dark, #0a0a0f);
-                    border: 1px solid var(--border, rgba(255,255,255,0.1));
-                    border-radius: 0.75rem;
-                    color: var(--text-primary, #fff);
-                    font-size: 0.875rem;
+                    background: #ffffff;
+                    border: 2px solid #e4e4e7;
+                    border-radius: 6px;
+                    color: #18181b;
+                    font-size: 1rem;
+                    font-family: inherit;
                     transition: all 0.2s ease;
                     box-sizing: border-box;
                 }
 
                 .form-input:focus {
                     outline: none;
-                    border-color: var(--primary, #6366f1);
-                    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+                    border-color: #18181b;
+                    box-shadow: 0 0 0 3px #f4f4f5;
                 }
 
                 .form-input::placeholder {
-                    color: var(--text-muted, rgba(255,255,255,0.4));
+                    color: #a1a1aa;
                 }
 
                 .btn {
@@ -122,40 +136,41 @@ class RegisterForm extends HTMLElement {
                     align-items: center;
                     justify-content: center;
                     gap: 0.5rem;
-                    padding: 0.875rem 1.5rem;
-                    border-radius: 0.75rem;
-                    font-weight: 600;
-                    font-size: 0.875rem;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 6px;
+                    font-weight: 500;
+                    font-size: 0.95rem;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     border: none;
                     text-decoration: none;
+                    font-family: inherit;
                 }
 
                 .btn-primary {
-                    background: linear-gradient(135deg, var(--primary, #6366f1) 0%, var(--primary-dark, #4f46e5) 100%);
-                    color: #fff;
+                    background: #18181b;
+                    color: #ffffff;
                 }
 
                 .btn-primary:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+                    background: #27272a;
+                    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06);
                 }
 
                 .btn-primary:disabled {
-                    opacity: 0.7;
+                    opacity: 0.6;
                     cursor: not-allowed;
-                    transform: none;
                 }
 
                 .btn-outline {
                     background: transparent;
-                    border: 1px solid var(--border, rgba(255,255,255,0.2));
-                    color: var(--text-primary, #fff);
+                    border: 2px solid #18181b;
+                    color: #18181b;
                 }
 
                 .btn-outline:hover {
-                    background: var(--surface-hover, rgba(255,255,255,0.05));
+                    background: #18181b;
+                    color: #ffffff;
                 }
 
                 .btn-block {
@@ -163,27 +178,40 @@ class RegisterForm extends HTMLElement {
                 }
 
                 .btn-lg {
-                    padding: 1rem 1.5rem;
-                    font-size: 1rem;
+                    padding: 1rem 2rem;
+                    font-size: 1.1rem;
                 }
 
                 .auth-divider {
-                    text-align: center;
+                    display: flex;
+                    align-items: center;
                     margin: 1.5rem 0;
-                    color: var(--text-muted, rgba(255,255,255,0.4));
+                    color: #a1a1aa;
+                }
+
+                .auth-divider::before,
+                .auth-divider::after {
+                    content: '';
+                    flex: 1;
+                    height: 1px;
+                    background: #e4e4e7;
+                }
+
+                .auth-divider span {
+                    padding: 0 1rem;
                     font-size: 0.875rem;
                 }
 
                 .auth-footer {
                     text-align: center;
-                    color: var(--text-secondary, rgba(255,255,255,0.7));
+                    color: #71717a;
                     font-size: 0.75rem;
                     margin-top: 1.5rem;
                 }
 
                 .alert {
                     padding: 1rem;
-                    border-radius: 0.75rem;
+                    border-radius: 6px;
                     margin-bottom: 1rem;
                     display: flex;
                     align-items: center;
@@ -192,15 +220,15 @@ class RegisterForm extends HTMLElement {
                 }
 
                 .alert-error {
-                    background: rgba(239, 68, 68, 0.1);
-                    border: 1px solid rgba(239, 68, 68, 0.3);
-                    color: #ef4444;
+                    background: #fee2e2;
+                    border: 1px solid #fecaca;
+                    color: #991b1b;
                 }
 
                 .alert-success {
-                    background: rgba(16, 185, 129, 0.1);
-                    border: 1px solid rgba(16, 185, 129, 0.3);
-                    color: #10b981;
+                    background: #dcfce7;
+                    border: 1px solid #bbf7d0;
+                    color: #166534;
                 }
 
                 @keyframes spin {
@@ -220,7 +248,7 @@ class RegisterForm extends HTMLElement {
                     <div class="auth-card">
                         <div class="auth-logo">
                             <h1><span>$</span> SplitWise</h1>
-                            <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.25rem;">Gestión de gastos grupales</p>
+                            <p>Gestión de gastos grupales</p>
                         </div>
                         
                         <h2 class="auth-title">Crea tu cuenta</h2>
