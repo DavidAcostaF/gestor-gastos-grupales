@@ -1,4 +1,4 @@
-// API Configuration
+// API Configuration - ES Module
 const API_BASE_URL = window.location.origin;
 
 /**
@@ -8,9 +8,9 @@ const API_BASE_URL = window.location.origin;
  * @param {object} data - Los datos a enviar (opcional)
  * @returns {Promise<object>} - La respuesta de la API
  */
-async function apiRequest(endpoint, method = 'GET', data = null) {
+export async function apiRequest(endpoint, method = 'GET', data = null) {
   const token = localStorage.getItem('token');
-  
+
   const headers = {
     'Content-Type': 'application/json',
   };
@@ -67,32 +67,11 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
  * @param {string} message - El mensaje a mostrar
  * @param {string} type - El tipo de notificación (success, error, warning, info)
  */
-function showToast(message, type = 'info') {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  
-  const icon = {
-    success: 'check-circle',
-    error: 'exclamation-circle',
-    warning: 'exclamation-triangle',
-    info: 'info-circle'
-  }[type] || 'info-circle';
-
-  toast.innerHTML = `
-    <i class="fas fa-${icon}"></i>
-    <span>${message}</span>
-  `;
-
-  container.appendChild(toast);
-
-  // Remover después de 4 segundos
-  setTimeout(() => {
-    toast.style.animation = 'slideIn 0.3s ease reverse';
-    setTimeout(() => toast.remove(), 300);
-  }, 4000);
+export function showToast(message, type = 'info') {
+  const container = document.querySelector('toast-container');
+  if (container && container.show) {
+    container.show(message, type);
+  }
 }
 
 /**
@@ -100,7 +79,7 @@ function showToast(message, type = 'info') {
  * @param {string} dateString - La fecha en formato ISO
  * @returns {string} - La fecha formateada
  */
-function formatDateLocale(dateString) {
+export function formatDateLocale(dateString) {
   if (!dateString) return '-';
   const date = new Date(dateString);
   return date.toLocaleDateString('es-MX', {
@@ -116,7 +95,7 @@ function formatDateLocale(dateString) {
  * @param {string} currency - El código de moneda (default: MXN)
  * @returns {string} - El monto formateado
  */
-function formatMoney(amount, currency = 'MXN') {
+export function formatMoney(amount, currency = 'MXN') {
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: currency
@@ -128,7 +107,7 @@ function formatMoney(amount, currency = 'MXN') {
  * @param {string} name - El nombre completo
  * @returns {string} - Las iniciales (máximo 2 caracteres)
  */
-function getInitials(name) {
+export function getInitials(name) {
   if (!name) return 'U';
   return name
     .split(' ')
@@ -144,7 +123,7 @@ function getInitials(name) {
  * @param {number} wait - El tiempo de espera en ms
  * @returns {function} - La función con debounce
  */
-function debounce(func, wait) {
+export function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
     const later = () => {
@@ -161,7 +140,7 @@ function debounce(func, wait) {
  * @param {string} email - El email a validar
  * @returns {boolean} - true si es válido
  */
-function isValidEmail(email) {
+export function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 }
@@ -171,8 +150,22 @@ function isValidEmail(email) {
  * @param {string} text - El texto a escapar
  * @returns {string} - El texto escapado
  */
-function escapeHtml(text) {
+export function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+/**
+ * Formatea una fecha corta
+ * @param {string} dateString - La fecha en formato ISO 
+ * @returns {string} - La fecha formateada
+ */
+export function formatDate(dateString) {
+  if (!dateString) return '-';
+  return new Date(dateString).toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  });
 }
